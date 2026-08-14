@@ -1,6 +1,6 @@
 ---
 name: ICS calendar parsing
-description: Parsing Google Calendar ICS feeds correctly for Jarvis live context.
+description: Parsing Google Calendar ICS feeds correctly for Infinity AI live context.
 ---
 
 ## Rule

@@ -1,4 +1,4 @@
-Build a voice AI assistant prototype called "Jarvis".
+Build a voice AI assistant prototype called "Infinity AI".
 
 I already have all required API keys ready:
 - Whisper-large-v3 API for speech-to-text
@@ -14,7 +14,7 @@ Core flow:
 3. Audio is sent to Whisper-large-v3.
 4. Whisper returns the transcript.
 5. The transcript is sent to the LLM with a special system prompt that tells it:
-   - It is Jarvis, a personal voice assistant.
+   - It is Infinity AI, a personal voice assistant.
    - It is currently in voice mode.
    - Responses must be short, natural, and conversational because they will be spoken aloud.
    - Avoid markdown, lists, and long explanations unless requested.
@@ -64,7 +64,7 @@ Backend:
 Create a configuration file where I can easily change:
 - LLM model
 - TTS voice
-- Jarvis personality prompt
+- Infinity AI personality prompt
 
 The first version does NOT need:
 - Smart home controls
@@ -73,6 +73,6 @@ The first version does NOT need:
 - Wake word detection
 - Phone integrations
 
-Focus only on creating the best possible "talk → think → speak" Jarvis experience.
+Focus only on creating the best possible "talk → think → speak" Infinity AI experience.
 
 Make the UI polished and futuristic, inspired by a high-end AI assistant interface.

@@ -1,4 +1,4 @@
-You are helping me complete the permanent specification for my Jarvis AI assistant project.
+You are helping me complete the permanent specification for my Infinity AI AI assistant project.
 
 IMPORTANT:
 - Do NOT modify code.
@@ -17,7 +17,7 @@ ALREADY KNOWN — DO NOT ASK AGAIN
 ==================================================
 
 PROJECT:
-Jarvis is a personal AI assistant combining ChatGPT + Siri.
+Infinity AI is a personal AI assistant combining ChatGPT + Siri.
 
 MAIN FEATURES:
 - Text chat
@@ -57,7 +57,7 @@ Examples:
 - Alarms
 
 When showing widgets:
-Jarvis says something like:
+Infinity AI says something like:
 "Here's the weather"
 then displays the widget.
 
@@ -98,22 +98,22 @@ ONLY ASK ABOUT THESE REMAINING AREAS
 
 Ask:
 
-- How should Jarvis decide whether to answer normally, use a widget, use an integration, or perform an action?
+- How should Infinity AI decide whether to answer normally, use a widget, use an integration, or perform an action?
 
-- When should Jarvis ask permission before doing something?
+- When should Infinity AI ask permission before doing something?
 
-- When should Jarvis act automatically?
+- When should Infinity AI act automatically?
 
 
 2. AI ERRORS AND UNCERTAINTY
 
 Ask:
 
-- What should Jarvis do when it is unsure?
+- What should Infinity AI do when it is unsure?
 
-- What should Jarvis do when an integration gives incorrect information?
+- What should Infinity AI do when an integration gives incorrect information?
 
-- Should Jarvis admit uncertainty or try its best answer?
+- Should Infinity AI admit uncertainty or try its best answer?
 
 
 3. MEMORY DETAILS
@@ -128,14 +128,14 @@ Ask:
 
 - Should memories ever expire?
 
-- Should Jarvis explain why it remembered something?
+- Should Infinity AI explain why it remembered something?
 
 
 4. VOICE SYSTEM DETAILS
 
 Ask:
 
-- Should Jarvis be able to interrupt itself while speaking?
+- Should Infinity AI be able to interrupt itself while speaking?
 
 - Should saying "stop" immediately stop speaking?
 
@@ -174,37 +174,37 @@ Ask:
 
 Ask:
 
-- Can Jarvis only read emails, or also draft/send/delete?
+- Can Infinity AI only read emails, or also draft/send/delete?
 
 - Should sending emails require confirmation?
 
-- Should Jarvis summarize emails automatically?
+- Should Infinity AI summarize emails automatically?
 
 
 8. GOOGLE CALENDAR BEHAVIOR
 
 Ask:
 
-- Can Jarvis create events?
+- Can Infinity AI create events?
 
-- Can Jarvis edit/delete events?
+- Can Infinity AI edit/delete events?
 
-- Should Jarvis remind users?
+- Should Infinity AI remind users?
 
-- Should Jarvis automatically understand schedules?
+- Should Infinity AI automatically understand schedules?
 
 
 9. SPOTIFY BEHAVIOR
 
 Ask:
 
-- Should Jarvis only control playback?
+- Should Infinity AI only control playback?
 
-- Should Jarvis search songs?
+- Should Infinity AI search songs?
 
-- Should Jarvis create playlists?
+- Should Infinity AI create playlists?
 
-- Should Jarvis recommend music?
+- Should Infinity AI recommend music?
 
 
 10. WEATHER BEHAVIOR
@@ -213,14 +213,14 @@ Ask:
 
 - Should weather only appear when requested?
 
-- Should Jarvis proactively warn about weather?
+- Should Infinity AI proactively warn about weather?
 
 
 11. SECURITY
 
 Ask:
 
-- Should Jarvis support only one user or multiple users?
+- Should Infinity AI support only one user or multiple users?
 
 - Should user data be encrypted?
 
@@ -233,7 +233,7 @@ Ask:
 
 Ask:
 
-- What response speed should Jarvis aim for?
+- What response speed should Infinity AI aim for?
 
 - Should answers stream word-by-word?
 
@@ -273,14 +273,14 @@ Ask:
 
 Ask:
 
-"What exactly would make you consider Jarvis complete?"
+"What exactly would make you consider Infinity AI complete?"
 
 ==================================================
 
 After all answers are collected:
 Create a final permanent document:
 
-JARVIS_MASTER_SPECIFICATION.md
+INFINITY AI_MASTER_SPECIFICATION.md
 
 Include:
 - Product identity

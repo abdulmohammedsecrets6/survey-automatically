@@ -4,15 +4,15 @@ PRODUCT UNDERSTANDING
 ==================================================
 
 Understand:
-- What Jarvis is supposed to be.
-- The difference between Jarvis and normal chatbots.
+- What Infinity AI is supposed to be.
+- The difference between Infinity AI and normal chatbots.
 - The intended ChatGPT + Siri experience.
 - The main daily workflow.
 
 Find unknowns about:
 - What makes an answer "good enough".
-- When Jarvis should act versus only answer.
-- How proactive Jarvis should be.
+- When Infinity AI should act versus only answer.
+- How proactive Infinity AI should be.
 
 
 ==================================================
@@ -194,7 +194,7 @@ IMPORTANT CONTEXT ALREADY KNOWN
 
 Do not ask these again:
 
-Jarvis is:
+Infinity AI is:
 - A personal AI assistant.
 - ChatGPT + Siri style.
 - Text + voice.

@@ -9,7 +9,7 @@ Investigating file structure
 
 Codebase explored
 
-Subagent: Explore these specific areas and return file paths + key code snippets: 1. artifacts/jarvis/src/components/widgets/MusicWidget.tsx - full content 2. artifacts/jarvis/src/components/widgets/ClockWidget.tsx - full content 3. artifacts/jarvis/src/components/settings-panel.tsx - full content (memories/profile UI) 4. artifacts/api-server/src/routes/jarvis/memories.ts (or wherever memories API is defined) 5. lib/db/src/schema/ - list all schema files and show the userMemories table definition 6. artifacts/jarvis/src/components/widgets/index.ts - export list 7. How the ClockWidget currently renders and what props it takes
+Subagent: Explore these specific areas and return file paths + key code snippets: 1. artifacts/infinity/src/components/widgets/MusicWidget.tsx - full content 2. artifacts/infinity/src/components/widgets/ClockWidget.tsx - full content 3. artifacts/infinity/src/components/settings-panel.tsx - full content (memories/profile UI) 4. artifacts/api-server/src/routes/infinity/memories.ts (or wherever memories API is defined) 5. lib/db/src/schema/ - list all schema files and show the userMemories table definition 6. artifacts/infinity/src/components/widgets/index.ts - export list 7. How the ClockWidget currently renders and what props it takes
 Reading necessary files
 
 Reading necessary files

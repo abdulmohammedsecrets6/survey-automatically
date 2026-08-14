@@ -1,5 +1,5 @@
 1. The product is mode-first instead of conversation-first
-Jarvis currently separates:
+Infinity AI currently separates:
 
 Chat
 Voice
@@ -13,14 +13,14 @@ The code explicitly tracks separate modes:
 
 'voice' | 'chat' | 'agent' | 'camera'
 
-Web search and agent behavior are also controlled by separate flags. This makes the user decide how Jarvis should work before asking the question.
+Web search and agent behavior are also controlled by separate flags. This makes the user decide how Infinity AI should work before asking the question.
 
 ChatGPT generally lets the assistant determine whether search, files, analysis, or tools are needed.
 
 This is probably the biggest source of the “unfinished” feeling.
 
 2. The model experience can feel inconsistent
-Jarvis uses a key rotation system and can prioritize:
+Infinity AI uses a key rotation system and can prioritize:
 
 OpenRouter free auto-router
 
@@ -35,7 +35,7 @@ Vision or file behavior may vary by provider.
 A ChatGPT replacement needs a clearly controlled default intelligence level, not only failover.
 
 3. File handling is much narrower than it appears
-Jarvis currently sends one file inline as base64. The backend deliberately handles:
+Infinity AI currently sends one file inline as base64. The backend deliberately handles:
 
 Images
 PDFs
@@ -70,17 +70,17 @@ System prompt
 Timestamps
 It does not contain a user or project boundary.
 
-That means Jarvis has history and memory, but not a strong project model such as:
+That means Infinity AI has history and memory, but not a strong project model such as:
 
 “My business”
 “This app”
 “My job search”
 “This research topic”
 “This folder of documents”
-ChatGPT feels more useful because ongoing context has a home. Jarvis currently makes the user return to isolated conversations or research gems.
+ChatGPT feels more useful because ongoing context has a home. Infinity AI currently makes the user return to isolated conversations or research gems.
 
 5. Deep Research is overpromising relative to the interface
-Jarvis advertises research runs lasting:
+Infinity AI advertises research runs lasting:
 
 5–12 hours
 1–3 days
@@ -108,7 +108,7 @@ A strong connection between the original question and final result
 Long-running work needs more transparency than normal chat. Otherwise it feels like launching a black box and hoping something good appears later.
 
 6. There are many panels, but not enough “finished outcomes”
-Jarvis has:
+Infinity AI has:
 
 Image generation
 Camera

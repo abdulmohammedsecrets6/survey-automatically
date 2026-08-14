@@ -1,11 +1,11 @@
-Before making ANY changes to this Jarvis project, I want you to fully understand the product, architecture, existing code, and my intended behavior.
+Before making ANY changes to this Infinity AI project, I want you to fully understand the product, architecture, existing code, and my intended behavior.
 
 Your job in this step is NOT to code.
 
 Your job is to:
 1. Inspect the entire repository.
 2. Understand how the frontend, backend, database, APIs, voice system, AI logic, widgets, and integrations currently work.
-3. Compare the existing implementation with the intended Jarvis product vision.
+3. Compare the existing implementation with the intended Infinity AI product vision.
 4. Identify every important ambiguity that could cause you to make the wrong implementation decision later.
 
 Then ask me the remaining questions you genuinely need answered.
@@ -26,15 +26,15 @@ PRODUCT UNDERSTANDING
 ==================================================
 
 Understand:
-- What Jarvis is supposed to be.
-- The difference between Jarvis and normal chatbots.
+- What Infinity AI is supposed to be.
+- The difference between Infinity AI and normal chatbots.
 - The intended ChatGPT + Siri experience.
 - The main daily workflow.
 
 Find unknowns about:
 - What makes an answer "good enough".
-- When Jarvis should act versus only answer.
-- How proactive Jarvis should be.
+- When Infinity AI should act versus only answer.
+- How proactive Infinity AI should be.
 
 
 ==================================================
@@ -216,7 +216,7 @@ IMPORTANT CONTEXT ALREADY KNOWN
 
 Do not ask these again:
 
-Jarvis is:
+Infinity AI is:
 - A personal AI assistant.
 - ChatGPT + Siri style.
 - Text + voice.
