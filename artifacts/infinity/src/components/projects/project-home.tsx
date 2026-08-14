@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useI18n, type TranslationKey } from '@/lib/i18n';
 
-export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot';
+export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq';
 
 interface ProjectSummary {
   id: string;
@@ -200,6 +200,14 @@ export function ProjectHome({
         description: t('projectHome.chatbotDesc'),
         count: 0,
         accent: 'text-sky-500 bg-sky-500/10 border-sky-500/20',
+      },
+      {
+        action: 'faq' as const,
+        icon: Sparkles,
+        label: t('projectHome.faq'),
+        description: t('projectHome.faqDesc'),
+        count: 0,
+        accent: 'text-violet-500 bg-violet-500/10 border-violet-500/20',
       },
     ];
   }, [payload, recentActivity, t]);

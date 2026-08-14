@@ -1,10 +1,16 @@
 # Session Brief — Infinity AI (formerly Jarvis)
-LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
+LAST_UPDATED: 2026-08-14 (Phase 3.2 complete)
 > Read FIRST every session (alongside **KNOWLEDGE.md**). **Updated on EVERY change** — this is how sessions feel like one chat.
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
 ## Just did (last action)
+- **Completed Phase 3.2 — Project FAQ UI component** (`project-faq.tsx`):
+  - Created `artifacts/infinity/src/components/projects/project-faq.tsx` with accordion list, regenerate button, source citation chips (inline + footer), empty state, cached indicator, loading state, error handling
+  - Added FAQ render branch in `home.tsx` for `activeProjectView === 'faq'`
+  - Added `faq` to `ProjectHomeAction` type + action card in `project-home.tsx`
+  - Added `projectHome.faq` / `projectHome.faqDesc` i18n keys (EN+NL)
+  - Typecheck + build pass for infinity artifact
 - **Completed Phase 3.1 — Project FAQ API route** (`project-faq.ts`):
   - Created `artifacts/api-server/src/routes/infinity/project-faq.ts` with POST `/projects/:id/faq/generate` and GET `/projects/:id/faq`
   - Uses `buildProjectContextByProjectId` for full project context (all 6 sources)
@@ -31,11 +37,13 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 - **Projects System Phase 2.4**: COMPLETE — Project Chatbot UI with citation chips
 - **Projects System Phase 2.5**: COMPLETE — Chatbot wired into project home & gallery
 - **Projects System Phase 3.1**: COMPLETE — Project FAQ API (generate + cached retrieval)
+- **Projects System Phase 3.2**: COMPLETE — Project FAQ UI (accordion, regenerate, source chips, full wiring)
 - **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
 - **Infinity Books** — live end-to-end run pending (needs server `.env`)
 - **Google Stitch Phase 1**: COMPLETE — 5 prompts + page inventory written to `docs/google-stitch-prompts/`
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
+- 2026-08-14: Phase 3.2 — Completed Project FAQ UI (`project-faq.tsx`): accordion list, regenerate button, source chips (inline + footer), empty state, cached indicator, loading/error handling; added FAQ render branch in home.tsx; added `faq` to ProjectHomeAction + action card in project-home.tsx; added `projectHome.faq`/`projectHome.faqDesc` i18n keys EN+NL; typecheck+build PASS
 - 2026-08-14: Phase 3.1 — Created Project FAQ API (`project-faq.ts`): POST /projects/:id/faq/generate (LLM 8-12 Q&A with sources), GET /projects/:id/faq (cached), schema `projectFaqs` (JSONB), auto-migrate CREATE TABLE, router mounted, logs `faq_generated` activity
 - 2026-08-14: Phase 2.5 — Wired Project Chatbot into project home & gallery: added 'chatbot' to activeProjectView, ProjectHomeAction, ProjectSection; created chatbot action card in project-home.tsx + quick access in project-gallery.tsx; added i18n keys EN+NL
 - 2026-08-14: Phase 2.4 — Created Project Chatbot UI component (`project-chatbot.tsx`): streaming SSE chat, inline citation chips, footer source chips, empty state with examples, stop/regenerate, error handling; 20+ i18n keys EN+NL
@@ -59,7 +67,7 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 
 ## Active threads
 - **Phase 2** (Timeline + Chatbot) — COMPLETE (2.1-2.5 done)
-- **Phase 3** (FAQ + Conflict Detection + Source Attribution) — **3.1 COMPLETE**, 3.2-3.5 ready to start
+- **Phase 3** (FAQ + Conflict Detection + Source Attribution) — **3.1-3.2 COMPLETE**, 3.3-3.5 ready to start
 - **Phase 4** (Mindmap + Cleanup) — can proceed in parallel with Phase 3
 - **Phase 5** (Connectors + Automations) — needs Phase 1 export schema + Phase 3 conflict detection
 - **Phase 6** (Sharing + Overview) — needs Phase 1 sharing + Phase 5 automation logging
@@ -68,10 +76,9 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 - **Google Stitch Phase 2** — await user request to use MCP to inspect generated designs and implement them
 
 ## Next actions
-1. **Start Phase 3.2** — Create `project-faq.tsx` UI component (accordion list, regenerate button, source chips linking to sources)
-2. **Start Phase 3.3** — Create `project-conflicts.ts` API route (POST `/projects/:id/conflicts/scan` + GET) with LLM contradiction detection
-3. **Start Phase 3.4** — Create `project-conflicts.tsx` UI component (list with severity badges, expand to show claims+sources, resolve actions)
-4. **Start Phase 3.5** — Extend `project_memory` schema + `project-memory.ts` lib with `sourceLocation` JSONB for line-level provenance
+1. **Start Phase 3.3** — Create `project-conflicts.ts` API route (POST `/projects/:id/conflicts/scan` + GET) with LLM contradiction detection
+2. **Start Phase 3.4** — Create `project-conflicts.tsx` UI component (list with severity badges, expand to show claims+sources, resolve actions)
+3. **Start Phase 3.5** — Extend `project_memory` schema + `project-memory.ts` lib with `sourceLocation` JSONB for line-level provenance
 
 ## Locked decisions
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
