@@ -12,11 +12,15 @@ import {
   listWorkspaceFiles,
   readWorkspaceFile,
   writeWorkspaceFile,
+  runTerminalCommand,
+  renameWorkspacePath,
+  deleteWorkspacePath,
   WORKSPACE_ROOT,
 } from "../../lib/workspace";
 import { getStorage, persistFile } from "../../lib/storage";
 import { jarvisConfig } from "../../config/jarvis";
 import { pooledClient } from "../../lib/llm-client";
+import { searchFiles, replaceInFiles } from "./search";
 import type { Browser, Page } from "puppeteer";
 
 const puppeteerPromise = import("puppeteer");
@@ -463,6 +467,109 @@ async function runPreviewAgentAction(page: Page, action: PreviewAgentAction): Pr
     return `pressed ${action.key || "Enter"}`;
   }
   throw new Error(`Unsupported preview action: ${action.action}`);
+}
+
+/** Run the preview agent toward a goal; returns structured result for the agent loop. */
+async function runPreviewAgentGoal(
+  goal: string,
+  workspaceId: string,
+  sessionId: string,
+  port: number,
+  maxSteps: number,
+): Promise<{ completed: boolean; summary: string; events: Array<{ message: string }>; consoleErrors: string[] }> {
+  const events: Array<{ message: string }> = [];
+  const consoleErrors: string[] = [];
+  let page: Page | null = null;
+  try {
+    const browser = await getScreenshotBrowser();
+    page = await browser.newPage();
+    await page.setViewport({ width: 1280, height: 900, deviceScaleFactor: 1 });
+    await page.setRequestInterception(true);
+    page.on("request", (request) => {
+      try {
+        const requestUrl = request.url();
+        const parsed = new URL(requestUrl);
+        if (request.isNavigationRequest() && request.frame() === page?.mainFrame() && !localPreviewUrl(requestUrl, port)) {
+          void request.abort();
+          return;
+        }
+      } catch {
+        void request.abort();
+        return;
+      }
+      void request.continue();
+    });
+    page.on("console", (message) => {
+      if (message.type() === "error") consoleErrors.push(message.text().slice(0, 500));
+    });
+    page.on("pageerror", (error: any) => consoleErrors.push(String(error?.message ?? error).slice(0, 500)));
+    const url = `http://127.0.0.1:${port}`;
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20_000 });
+    events.push({ message: "Opened the local preview and inspected its interactive elements." });
+
+    let summary = "The agent stopped before completing the goal.";
+    let completed = false;
+    for (let step = 1; step <= maxSteps; step += 1) {
+      const elements = await inspectPreviewPage(page);
+      const decisionPrompt = [
+        `Goal: ${goal}`,
+        `Step: ${step} of ${maxSteps}`,
+        `Interactive elements (use the numeric id, never invent selectors): ${JSON.stringify(elements)}`,
+        `Recent browser console errors: ${JSON.stringify(consoleErrors.slice(-8))}`,
+        "Choose the next smallest useful action. Return JSON only: {done:boolean,message:string,actions:[{action:'click'|'type'|'select'|'press'|'wait'|'done',id?,text?,value?,key?,milliseconds?}]}",
+        "Use type only for visible text inputs, never password fields. Use click for buttons and submit controls. Stop with done true when the goal is satisfied or cannot be safely completed.",
+      ].join("\n");
+      const completion = await pooledClient().chat.completions.create({
+        model: jarvisConfig.llmModel,
+        messages: [
+          {
+            role: "system",
+            content: withExtraBuildInstructions(
+              "You control a website preview inside a local IDE. You must reason from the supplied element inventory, act only on the local page, and never claim success without checking the resulting state. Return valid JSON only. Never use the em dash character.",
+              "",
+            ),
+          },
+          { role: "user", content: decisionPrompt },
+        ],
+        temperature: 0.1,
+        max_tokens: 700,
+      });
+      const decision = parsePreviewAgentDecision(completion.choices[0]?.message?.content?.trim() ?? "");
+      if (!decision) {
+        summary = "Jarvis could not produce a valid browser action plan.";
+        events.push({ message: summary });
+        break;
+      }
+      summary = decision.message || summary;
+      events.push({ message: decision.message || `Planning step ${step}.` });
+      if (decision.done || decision.actions.length === 0) {
+        completed = decision.done;
+        break;
+      }
+      for (const action of decision.actions) {
+        if (action.action === "done") {
+          completed = true;
+          break;
+        }
+        try {
+          const message = await runPreviewAgentAction(page, action);
+          events.push({ message });
+        } catch (error) {
+          const message = error instanceof Error ? error.message : "Browser action failed";
+          events.push({ message });
+        }
+      }
+      if (completed) break;
+    }
+    events.push({ message: completed ? "The browser goal was completed." : summary });
+    return { completed, summary, events, consoleErrors };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Preview agent failed";
+    events.push({ message });
+    return { completed: false, summary: message, events, consoleErrors };
+  } finally {
+    await page?.close().catch(() => undefined);
+  }
 }
 
 /** Capture a PNG of the running preview and persist it to the Gallery store. */
@@ -1061,6 +1168,481 @@ router.get("/build/preview/status", async (req, res) => {
   const workspaceId = cleanText(req.query.workspaceId, 64) || "default";
   const entry = previewProcesses.get(previewKey(workspaceId, sessionId));
   res.json(entry ? { running: true, workspaceId, port: entry.port, command: entry.command, output: entry.output.slice(-4000) } : { running: false, workspaceId });
+});
+
+/**
+ * ─────────────────────────────────────────────────────────────────────────
+ * AUTONOMOUS BUILD AGENT
+ * ─────────────────────────────────────────────────────────────────────────
+ * A genuine agentic coding loop. Instead of one-shot "generate every file"
+ * then a reviewer, Jarvis now:
+ *   1. plans the work from the request + an inventory of the workspace,
+ *   2. repeatedly asks the LLM to emit ONE tool call,
+ *   3. executes that tool against real primitives (filesystem, terminal,
+ *      preview, browser, tests, search, git),
+ *   4. returns the observation to the model,
+ *   5. continues until the model signals "done" or a bounded step budget
+ *      is exhausted, then runs a final verification pass.
+ *
+ * Every tool reuses existing, already-audited primitives from workspace.ts,
+ * build.ts (preview/screenshot/browser), search.ts, and the sibling routes.
+ * Nothing here duplicates existing functionality; it orchestrates it.
+ */
+
+type AgentToolName =
+  | "list_files"
+  | "read_file"
+  | "write_file"
+  | "patch_file"
+  | "rename_file"
+  | "delete_file"
+  | "run_terminal"
+  | "search_files"
+  | "replace_in_files"
+  | "preview_screenshot"
+  | "browser_action"
+  | "run_tests"
+  | "verify_claim"
+  | "git_status"
+  | "think"
+  | "done";
+
+interface AgentToolCall {
+  tool: AgentToolName;
+  reason?: string;
+  path?: string;
+  content?: string;
+  search?: string;
+  replacement?: string;
+  command?: string;
+  viewport?: "desktop" | "mobile";
+  goal?: string;
+  maxSteps?: number;
+  text?: string;
+  value?: string;
+  key?: string;
+  query?: string;
+  claim?: string;
+  workspace?: string;
+}
+
+interface AgentStep {
+  step: number;
+  tool: AgentToolName;
+  reason: string;
+  observation: string;
+  ok: boolean;
+}
+
+interface AgentEvent {
+  type: "plan" | "tool" | "observation" | "verify" | "done" | "error";
+  step?: number;
+  tool?: string;
+  message: string;
+  detail?: string;
+}
+
+/** Bounded, agent-side tool protocol for the autonomous build loop. */
+const AGENT_TOOL_SCHEMA = `You are an autonomous coding agent inside Jarvis Build. On EVERY turn you MUST emit exactly one tool call as a JSON object (no prose before or after) of this shape:
+{"tool":"<name>","reason":"<one short sentence why>","...args"}
+Allowed tools and their args:
+- list_files — list the workspace tree.
+- read_file {path} — read a file's content.
+- write_file {path,content} — create/overwrite a file.
+- patch_file {path,search:"<exact existing text to replace>",replacement:"<new text>"} — surgically edit a file. The search must appear verbatim in the file; if it does not, the call fails and you must re-read and retry with the correct text.
+- rename_file {path,newPath} — rename/move a file.
+- delete_file {path} — delete a file.
+- run_terminal {command} — run one shell command in the workspace (capped, sandboxed). Use it for installs, builds, linters, and app commands.
+- search_files {query,regex?,caseSensitive?} — grep the workspace.
+- replace_in_files {search,replacement,regex?,caseSensitive?,files?} — replace text across files.
+- preview_screenshot {viewport?:"desktop"|"mobile"} — capture a PNG of the running local preview (start the preview first via run_terminal).
+- browser_action {goal,maxSteps?} — drive the live preview like a user (click/type/navigate) to test behavior.
+- run_tests {command?} — run the project test command (auto-detected if omitted).
+- verify_claim {claim} — check a factual claim against the live web (Tavily) when correctness depends on external facts.
+- git_status — show the workspace git status.
+- think {reason:"<internal note>"} — when you need to reason before acting (emits no side effect).
+- done {"summary":"<what you built and verified>"} — ONLY when the request is fully implemented AND verified (preview works, no runtime errors). Never finish early.
+Rules: inspect before editing, edit precisely (prefer patch_file over write_file), run_terminal to install/build/test, verify visually with preview_screenshot or behaviorally with browser_action, and loop until done. NEVER use the em dash character. Keep reason <= 160 chars.`;
+
+/** Parse one agent tool call, tolerating markdown fences and stray text. */
+function parseAgentToolCall(raw: string): AgentToolCall | null {
+  const match = raw.match(/\{[\s\S]*\}/);
+  if (!match) return null;
+  try {
+    const parsed = JSON.parse(match[0]) as Record<string, unknown>;
+    const tool = parsed.tool;
+    if (typeof tool !== "string" || !/^[a-z_]{3,24}$/.test(tool)) return null;
+    const allowed = new Set<AgentToolName>([
+      "list_files", "read_file", "write_file", "patch_file", "rename_file", "delete_file",
+      "run_terminal", "search_files", "replace_in_files", "preview_screenshot", "browser_action",
+      "run_tests", "verify_claim", "git_status", "think", "done",
+    ]);
+    if (!allowed.has(tool as AgentToolName)) return null;
+    return {
+      tool: tool as AgentToolName,
+      reason: cleanText(parsed.reason, 160),
+      path: cleanText(parsed.path, 500),
+      content: typeof parsed.content === "string" ? parsed.content.slice(0, 2_000_000) : undefined,
+      search: typeof parsed.search === "string" ? parsed.search.slice(0, 100_000) : undefined,
+      replacement: typeof parsed.replacement === "string" ? parsed.replacement.slice(0, 100_000) : undefined,
+      command: cleanText(parsed.command, 12_000),
+      viewport: parsed.viewport === "mobile" ? "mobile" : "desktop",
+      goal: cleanText(parsed.goal, 1200),
+      maxSteps: Math.min(12, Math.max(1, Number(parsed.maxSteps) || 6)),
+      text: cleanText(parsed.text, 2000),
+      value: cleanText(parsed.value, 300),
+      key: cleanText(parsed.key, 40),
+      query: cleanText(parsed.query, 500),
+      claim: cleanText(parsed.claim, 2000),
+      workspace: cleanText(parsed.workspace, 64),
+    };
+  } catch {
+    return null;
+  }
+}
+
+/** Verify an exact substring exists in a file; returns the line span for the observation. */
+async function verifyPatchTarget(workspaceId: string, relPath: string, search: string): Promise<{ found: boolean; snippet?: string }> {
+  const result = await readWorkspaceFile(relPath, 100_000, workspaceId);
+  if (!result.ok) return { found: false };
+  const idx = result.content.indexOf(search);
+  if (idx < 0) return { found: false };
+  const before = result.content.slice(Math.max(0, idx - 120), idx);
+  const after = result.content.slice(idx + search.length, idx + search.length + 120);
+  return { found: true, snippet: `...${before}⟦TARGET⟧${after}...` };
+}
+
+/** Execute one agent tool call and return an observation string + ok flag. */
+async function executeAgentTool(
+  call: AgentToolCall,
+  ctx: { workspaceId: string; sessionId: string; prompt: string; answers: Record<string, string> },
+  events: AgentEvent[],
+): Promise<{ observation: string; ok: boolean }> {
+  const { workspaceId, sessionId } = ctx;
+  switch (call.tool) {
+    case "list_files": {
+      const files = (await listWorkspaceFiles(workspaceId)).map((e) => e.path).slice(0, 200);
+      return { observation: `Workspace files (${files.length}):\n${files.join("\n") || "(empty)"}`, ok: true };
+    }
+    case "read_file": {
+      if (!call.path) return { observation: "read_file requires {path}.", ok: false };
+      const result = await readWorkspaceFile(call.path, 100_000, workspaceId);
+      if (!result.ok) return { observation: `Cannot read ${call.path}: ${result.error}`, ok: false };
+      return { observation: `=== ${call.path} ===\n${result.content.slice(0, 80_000)}`, ok: true };
+    }
+    case "write_file": {
+      if (!call.path || call.content === undefined) return { observation: "write_file requires {path,content}.", ok: false };
+      if (!safeWorkspacePath(call.path, workspaceId)) return { observation: `Path rejected: ${call.path}`, ok: false };
+      const result = await writeWorkspaceFile(call.path, call.content, workspaceId);
+      return result.ok
+        ? { observation: `Wrote ${call.path} (${call.content.length} chars).`, ok: true }
+        : { observation: `Write failed: ${result.error}`, ok: false };
+    }
+    case "patch_file": {
+      if (!call.path || call.search === undefined || call.replacement === undefined) {
+        return { observation: "patch_file requires {path,search,replacement}.", ok: false };
+      }
+      // Verify the exact target exists before mutating — this is what makes
+      // the agent edit "precisely" rather than blindly.
+      const verify = await verifyPatchTarget(workspaceId, call.path, call.search);
+      if (!verify.found) {
+        return {
+          observation: `patch_file aborted: the exact search text was NOT found in ${call.path}. Re-read the file and supply verbatim text. Context near expectation:\n${verify.snippet ?? "(file unreadable/missing)"}`,
+          ok: false,
+        };
+      }
+      const current = await readWorkspaceFile(call.path, 2_000_000, workspaceId);
+      if (!current.ok) return { observation: `Cannot read ${call.path} to patch.`, ok: false };
+      const updated = current.content.replace(call.search, call.replacement);
+      if (updated === current.content) return { observation: "patch_file made no change (search not found).", ok: false };
+      const written = await writeWorkspaceFile(call.path, updated, workspaceId);
+      return written.ok
+        ? { observation: `Patched ${call.path} (replaced ${call.search.length} chars).`, ok: true }
+        : { observation: `Patch write failed: ${written.error}`, ok: false };
+    }
+    case "rename_file": {
+      if (!call.path || !call.content) {
+        // call.path = source, call.content = destination
+      }
+      const from = call.path ?? "";
+      const to = call.content ?? "";
+      if (!from || !to) return { observation: "rename_file requires {path,content:newPath}.", ok: false };
+      try {
+        const res = await renameWorkspacePath(from, to, workspaceId);
+        return res.ok ? { observation: `Renamed ${from} → ${to}.`, ok: true } : { observation: `Rename failed: ${res.error}`, ok: false };
+      } catch (err) {
+        return { observation: `Rename failed: ${err instanceof Error ? err.message : String(err)}`, ok: false };
+      }
+    }
+    case "delete_file": {
+      if (!call.path) return { observation: "delete_file requires {path}.", ok: false };
+      try {
+        await deleteWorkspacePath(call.path, workspaceId);
+        return { observation: `Deleted ${call.path}.`, ok: true };
+      } catch (err) {
+        return { observation: `Delete failed: ${err instanceof Error ? err.message : String(err)}`, ok: false };
+      }
+    }
+    case "run_terminal": {
+      if (!call.command) return { observation: "run_terminal requires {command}.", ok: false };
+      const run = await runTerminalCommand("default", call.command, { workspaceId, timeoutMs: 60_000 });
+      const out = `${run.stdout}${run.stderr}`.slice(-6000);
+      const tail = run.timedOut ? "\n[command timed out]" : run.exitCode !== 0 ? `\n[exit ${run.exitCode}]` : "\n[exit 0]";
+      return { observation: `Ran: ${call.command}\n${out}${tail}`, ok: run.exitCode === 0 };
+    }
+    case "search_files": {
+      if (!call.query) return { observation: "search_files requires {query}.", ok: false };
+      const result = await searchFiles(workspaceId, call.query, {
+        regex: call.replacement === "regex",
+        caseSensitive: call.workspace === "case",
+        maxResults: 60,
+      });
+      const preview = result.matches.slice(0, 40)
+        .map((m) => `${m.file}:${m.line}: ${m.preview.trim()}`)
+        .join("\n");
+      return {
+        observation: `Search "${call.query}" → ${result.totalMatches} matches in ${result.filesWithMatches} files.\n${preview || "(no matches)"}`,
+        ok: true,
+      };
+    }
+    case "replace_in_files": {
+      if (!call.search || call.replacement === undefined) return { observation: "replace_in_files requires {search,replacement}.", ok: false };
+      const files = call.path ? [call.path] : [];
+      const result = await replaceInFiles(workspaceId, call.search, call.replacement, {
+        regex: call.query === "regex",
+        caseSensitive: call.workspace === "case",
+        files: files.slice(0, 50),
+        maxReplacements: 2000,
+      });
+      return {
+        observation: `Replaced ${result.totalReplaced} occurrence(s) across ${result.filesModified.length} file(s): ${result.filesModified.join(", ") || "(none)"}`,
+        ok: result.totalReplaced > 0,
+      };
+    }
+    case "preview_screenshot": {
+      const preview = findPreview(workspaceId, sessionId);
+      if (!preview) return { observation: "No preview is running. Start one with run_terminal (e.g. `python3 -m http.server ${PORT}` or npm run dev) first.", ok: false };
+      const url = `http://127.0.0.1:${preview.port}`;
+      const shot = await capturePreviewPng(url, workspaceId, call.viewport ?? "desktop");
+      if (!shot) return { observation: "Screenshot failed — headless browser unavailable.", ok: false };
+      return { observation: `Captured ${call.viewport ?? "desktop"} preview screenshot. dataUrl length=${shot.dataUrl.length}. Use it to judge layout/visuals.`, ok: true, };
+    }
+    case "browser_action": {
+      if (!call.goal) return { observation: "browser_action requires {goal}.", ok: false };
+      const preview = findPreview(workspaceId, sessionId);
+      if (!preview) return { observation: "No preview running — start it first.", ok: false };
+      const agentRes = await runPreviewAgentGoal(call.goal, workspaceId, sessionId, preview.port, call.maxSteps ?? 6);
+      return { observation: `Browser agent: completed=${agentRes.completed}. ${agentRes.summary}\nEvents:\n${agentRes.events.map((e) => `- ${e.message}`).join("\n")}\nConsole errors: ${agentRes.consoleErrors.join(" | ") || "none"}`, ok: agentRes.completed };
+    }
+    case "run_tests": {
+      const command = call.command?.trim() || await detectTestCommand(workspaceId);
+      if (!command) return { observation: "No test command detected and none provided.", ok: false };
+      const run = await runTerminalCommand("default", command, { workspaceId, timeoutMs: 90_000 });
+      const out = `${run.stdout}${run.stderr}`.slice(-6000);
+      return { observation: `Tests (${command}):\n${out}\n[exit ${run.exitCode}]`, ok: run.exitCode === 0 };
+    }
+    case "verify_claim": {
+      if (!call.claim) return { observation: "verify_claim requires {claim}.", ok: false };
+      const verdict = await verifyClaimAgainstWeb(call.claim);
+      return { observation: `verify_claim: ${verdict.verdict}. ${verdict.note}\nSources: ${verdict.sources.join(", ") || "none"}`, ok: verdict.verdict !== "unverifiable" };
+    }
+    case "git_status": {
+      const run = await runTerminalCommand("default", "git status --porcelain --branch 2>/dev/null || echo 'no git repo'", { workspaceId, timeoutMs: 10_000 });
+      return { observation: `Git status:\n${run.stdout.slice(-3000) || run.stderr.slice(-1000)}`, ok: true };
+    }
+    case "think": {
+      return { observation: `(thinking noted: ${call.reason ?? "—"})`, ok: true };
+    }
+    case "done": {
+      return { observation: `Agent marked done. Summary: ${call.reason ?? "(none)"}`, ok: true };
+    }
+    default:
+      return { observation: `Unknown tool: ${call.tool}`, ok: false };
+  }
+}
+
+/** Heuristic test-command detection from workspace files. */
+async function detectTestCommand(workspaceId: string): Promise<string | null> {
+  const entries = await listWorkspaceFiles(workspaceId);
+  const files = entries.map((e) => e.path);
+  if (files.includes("package.json")) {
+    return "npm test";
+  }
+  if (files.includes("pytest.ini") || files.includes("pyproject.toml") || files.includes("setup.py") || files.includes("test_requirements.txt")) {
+    return "pytest";
+  }
+  if (files.includes("Cargo.toml")) return "cargo test";
+  if (files.includes("go.mod")) return "go test ./...";
+  if (files.includes("pom.xml")) return "mvn test";
+  return null;
+}
+
+
+async function verifyClaimAgainstWeb(claim: string): Promise<{ verdict: "supported" | "contradicted" | "unverifiable"; note: string; sources: string[] }> {
+  const apiKey = process.env["TAVILY_API_KEY"] ?? process.env["WEB_SEARCH_API_KEY"];
+  if (!apiKey) return { verdict: "unverifiable", note: "No web search key configured; cannot verify external claims.", sources: [] };
+  try {
+    const res = await fetch("https://api.tavily.com/search", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ api_key: apiKey, query: claim, search_depth: "basic", max_results: 4 }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!res.ok) return { verdict: "unverifiable", note: "Search request failed.", sources: [] };
+    const data = (await res.json()) as { results?: Array<{ url: string; content?: string }> };
+    const snippets = (data.results ?? []).map((r) => r.content ?? "").join(" ");
+    const sources = (data.results ?? []).map((r) => r.url).slice(0, 3);
+    const overlap = claim.toLowerCase().split(/\W+/).filter((w) => w.length > 4)
+      .filter((w) => snippets.toLowerCase().includes(w)).length;
+    const verdict = overlap >= Math.min(3, Math.ceil(claim.split(/\W+/).filter((w) => w.length > 4).length / 3))
+      ? "supported" as const : "unverifiable" as const;
+    return { verdict, note: verdict === "supported" ? "Matches published sources." : "Not clearly confirmed by top sources.", sources };
+  } catch {
+    return { verdict: "unverifiable", note: "Search request errored.", sources: [] };
+  }
+}
+
+/** Build a compact plan from the request so the first turn has context. */
+async function createAgentPlan(prompt: string, answers: Record<string, string>, workspaceId: string): Promise<string> {
+  const files = (await listWorkspaceFiles(workspaceId)).map((e) => e.path).slice(0, 60);
+  const userSummary = Object.entries(answers).map(([k, v]) => `${k}: ${v}`).join("; ");
+  const system = withExtraBuildInstructions(
+    "You are the planning layer of the autonomous Jarvis Build agent. Given a request and the current workspace, " +
+    "write a short, ordered plan of concrete steps the agent will take (inspect, scaffold/edit, install, run, verify). " +
+    "Return ONLY plain text, no JSON, no markdown fences. Never use the em dash character.",
+    "",
+  );
+  try {
+    const completion = await pooledClient().chat.completions.create({
+      model: jarvisConfig.llmModel,
+      messages: [
+        { role: "system", content: system },
+        { role: "user", content: `Request: ${prompt}\nAnswers: ${userSummary || "(none)"}\nWorkspace: ${files.join(", ") || "(empty)"}` },
+      ],
+      temperature: 0.2,
+      max_tokens: 600,
+    });
+    return completion.choices[0]?.message?.content?.trim() || `Build: ${prompt}`;
+  } catch {
+    return `Build: ${prompt}\nWorkspace: ${files.join(", ") || "(empty)"}`;
+  }
+}
+
+/**
+ * POST /build/agent — run the autonomous build loop.
+ * Streams progress as Server-Sent Events; final event is {type:"result",...}.
+ */
+router.post("/build/agent", async (req, res) => {
+  const workspaceId = cleanText(req.body?.workspaceId, 64) || "default";
+  const sessionId = cleanText(req.body?.sessionId, 100) || "studio-preview";
+  const prompt = cleanText(req.body?.prompt, 1200);
+  const extraSystemPrompt = cleanText(req.body?.extraSystemPrompt, 4000);
+  const rawAnswers = req.body?.answers && typeof req.body.answers === "object" && !Array.isArray(req.body.answers)
+    ? req.body.answers as Record<string, unknown>
+    : {};
+  const answers = Object.fromEntries(Object.entries(rawAnswers).map(([k, v]) => [k, cleanText(v, 200)]).filter(([, v]) => v));
+  const maxSteps = Math.min(40, Math.max(4, Number(req.body?.maxSteps) || 24));
+  if (!prompt) {
+    res.status(400).json({ error: "A build request is required" });
+    return;
+  }
+
+  // SSE headers
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache, no-transform");
+  res.setHeader("Connection", "keep-alive");
+  res.setHeader("X-Accel-Buffering", "no");
+  res.flushHeaders?.();
+
+  const send = (event: AgentEvent | { type: "result"; ok: boolean; summary: string; steps: AgentStep[]; files: string[] }) => {
+    res.write(`data: ${JSON.stringify(event)}\n\n`);
+  };
+
+  const events: AgentEvent[] = [];
+  const steps: AgentStep[] = [];
+  const filesTouched = new Set<string>();
+
+  try {
+    await ensureWorkspace(workspaceId);
+    const plan = await createAgentPlan(prompt, answers, workspaceId);
+    events.push({ type: "plan", message: plan });
+    send({ type: "plan", message: plan });
+
+    const systemPrompt = withExtraBuildInstructions(AGENT_TOOL_SCHEMA, extraSystemPrompt);
+    const history: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: `Request: ${prompt}\nAnswers: ${JSON.stringify(answers)}\nPlan:\n${plan}\nBegin. Emit your first tool call as JSON.` },
+    ];
+
+    let finished = false;
+    let summary = "";
+    for (let step = 1; step <= maxSteps && !finished; step += 1) {
+      const completion = await pooledClient().chat.completions.create({
+        model: jarvisConfig.llmModel,
+        messages: history,
+        temperature: 0.2,
+        max_tokens: 1200,
+      });
+      const raw = completion.choices[0]?.message?.content?.trim() ?? "";
+      const call = parseAgentToolCall(raw);
+      if (!call) {
+        events.push({ type: "error", step, message: "Model did not return a valid tool call; retrying with a reminder." });
+        send({ type: "error", step, message: "Invalid tool call format. Emit exactly one JSON tool call." });
+        history.push({ role: "assistant", content: raw });
+        history.push({ role: "user", content: "That was not a valid tool call. Respond with exactly one JSON object of the form {\"tool\":\"...\",\"reason\":\"...\", ...}." });
+        continue;
+      }
+
+      events.push({ type: "tool", step, tool: call.tool, message: call.reason ?? call.tool });
+      send({ type: "tool", step, tool: call.tool, message: call.reason ?? call.tool });
+
+      if (call.path) filesTouched.add(call.path);
+
+      const { observation, ok } = await executeAgentTool(call, { workspaceId, sessionId, prompt, answers }, events);
+      steps.push({ step, tool: call.tool, reason: call.reason ?? "", observation: observation.slice(0, 800), ok });
+      events.push({ type: "observation", step, tool: call.tool, message: observation.slice(0, 600) });
+      send({ type: "observation", step, tool: call.tool, message: observation.slice(0, 1000) });
+
+      history.push({ role: "assistant", content: raw });
+      history.push({ role: "user", content: `Observation (${ok ? "ok" : "failed"}): ${observation.slice(0, 6000)}\n\nEmit the next tool call as JSON, or {\"tool\":\"done\",\"reason\":\"<summary>\"} when fully implemented and verified.` });
+
+      if (call.tool === "done") {
+        finished = true;
+        summary = call.reason ?? "Build complete.";
+        events.push({ type: "done", step, message: summary });
+        send({ type: "done", step, message: summary });
+      }
+    }
+
+    // Final verification pass — confirm a runnable entry point + sane preview.
+    events.push({ type: "verify", message: "Running final verification pass." });
+    send({ type: "verify", message: "Running final verification pass." });
+    const files = (await listWorkspaceFiles(workspaceId)).map((e) => e.path);
+    const hasEntry = files.some((f) => /^index\.(html|js|ts)$/i.test(f) || f === "main.js" || f === "main.tsx" || f === "App.tsx");
+    const preview = findPreview(workspaceId, sessionId);
+    let verifyNote = hasEntry ? "Entry point present. " : "Warning: no obvious entry point (index.html/main). ";
+    if (preview) {
+      const shot = await capturePreviewPng(`http://127.0.0.1:${preview.port}`, workspaceId, "desktop");
+      verifyNote += shot ? "Preview screenshot captured successfully." : "Preview screenshot failed.";
+    } else {
+      verifyNote += "No preview running (start one to visually verify).";
+    }
+
+    send({
+      type: "result",
+      ok: finished && hasEntry,
+      summary: summary || `Stopped after ${steps.length} steps. ${verifyNote}`,
+      steps,
+      files: [...filesTouched],
+    });
+  } catch (err) {
+    const message = err instanceof Error ? err.message : "Agent loop failed";
+    req.log.error({ err }, "Build agent loop failed");
+    send({ type: "error", message });
+    send({ type: "result", ok: false, summary: `Agent error: ${message}`, steps, files: [...filesTouched] });
+  } finally {
+    res.end();
+  }
 });
 
 export default router;
