@@ -73,7 +73,6 @@ LAST_UPDATED: 2026-08-14 (Grand Vision full incorporation into KNOWLEDGE.md)
   - `mindmap_inferred` added to project-activity enum
 - **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
 - **Infinity Books** — live end-to-end run pending (needs server `.env`)
-- **Google Stitch Phase 1**: COMPLETE — 5 prompts + page inventory written to `docs/google-stitch-prompts/`
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
 - 2026-08-14: Updated KNOWLEDGE.md Grand Vision section with complete detailed vision (28 sections: Core AI Philosophy, Plan→Review→Execute, 17 Widget Types, Build Flow, Website Versioning, Apply Template, Self-Evolution Inspect/Edit/Heal, Git Transparency, Promo Video Maker, Infinity Self-Promo, Browser-Powered Business Research, Unified Conversational Execution, Deep Workspaces, Visual Feedback Widgets, Big Unifying Idea)
@@ -109,14 +108,12 @@ LAST_UPDATED: 2026-08-14 (Grand Vision full incorporation into KNOWLEDGE.md)
 - **Phase 6** (Sharing + Overview) — needs Phase 1 sharing + Phase 5 automation logging
 - **Build Studio reliability**: visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
 - **Infinity Books** — live end-to-end run pending (needs server `.env`).
-- **Google Stitch Phase 2** — await user request to use MCP to inspect generated designs and implement them
 
 ## Next actions
 1. **Phase 4 COMPLETE** — Mindmap + Cleanup all wired (4.1-4.6 done, typecheck + build PASS)
 2. **Start Phase 5** — Connectors + Automations (GitHub, Google Drive, Figma, Calendar, Gmail; scheduled triggers + automation logging)
 3. **Start Phase 6** — Sharing + Overview (project share management UI, global Infinity overview dashboard)
 4. **Infinity Books** — live end-to-end run pending (needs server `.env` with API keys)
-5. **Google Stitch Phase 2** — await user request to use MCP to inspect generated designs and implement them
 
 ## Locked decisions
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
