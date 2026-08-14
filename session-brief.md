@@ -181,10 +181,27 @@ LAST_UPDATED: 2026-08-14 10:45
 - **Projects System** — Phases B–H are implemented and verified; Phase I project files is next. Steps 21–32 are still awaited for the full-plan reconciliation.
 - **Infinity Books** — live end-to-end run pending (needs server `.env`).
 
+## Just did (last action)
+- Completed Phase 1 of Google Stitch redesign: created comprehensive page inventory (17 distinct pages) and 5 Stitch prompts covering all pages exactly once
+  - Created `docs/google-stitch-prompts/page-inventory.md` — distinguishes 17 actual pages from 14 modal/state components
+  - Created `docs/google-stitch-prompts/prompt-1-core-chat.md` — Chat Mode, Voice Mode, Camera Mode, Agent Mode, Command Palette (5 pages)
+  - Created `docs/google-stitch-prompts/prompt-2-projects.md` — Projects Home, Project Memory, Project Instructions, Project Activity (4 pages)
+  - Created `docs/google-stitch-prompts/prompt-3-build-studio.md` — Build Studio with 13 tabs (1 page)
+  - Created `docs/google-stitch-prompts/prompt-4-creative-studios.md` — Studios Hub, Research Panel, Book Studio, Design Studio, Music Studio (5 pages)
+  - Created `docs/google-stitch-prompts/prompt-5-data-lab-settings.md` — Data Lab, Settings Panel (2 pages)
+  - All prompts: structural specs only, no visual direction, actual text/labels from codebase, max 5 pages per prompt
+
+## Project state — right now
+- **Google Stitch Phase 1**: COMPLETE — all 5 prompts + page inventory written to `docs/google-stitch-prompts/`
+- **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
+- **Projects System** — Phases B–H + I + L + M implemented and verified; Phase I project files is next. Steps 21–32 still awaited.
+- **Infinity Books** — live end-to-end run pending (needs server `.env`)
+
 ## Next actions
 1. Push agentic-build-development branch to abdulmohammedsecrets6/survey-automatically (already done this session)
 2. On the next Projects System request, read `docs/projects-system-plan.md` first and continue with Phase I project files
 3. Optional: delete now-inert `.cron_watchdog.sh` / `.tmux_runner.sh` if user wants
+4. When user requests Phase 2: use Google Stitch MCP to inspect generated designs and implement them
 
 ## Locked decisions
 - Projects System: **plan-first** — build only after all 32 steps are planned (user instruction).
