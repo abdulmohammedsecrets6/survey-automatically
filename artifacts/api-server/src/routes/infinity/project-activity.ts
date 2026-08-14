@@ -47,6 +47,14 @@ const VALID_TYPES = [
   "task_added",
   "task_completed",
   "agent_ran",
+  "faq_generated",
+  "conflict_detected",
+  "cleanup_ran",
+  "import_completed",
+  "export_completed",
+  "automation_triggered",
+  "connector_sync",
+  "shared_access",
 ] as const;
 
 type ActivityType = (typeof VALID_TYPES)[number];

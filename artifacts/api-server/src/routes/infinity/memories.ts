@@ -8,7 +8,15 @@ const router = Router();
 router.get("/memories", async (_req, res) => {
   try {
     const rows = await db.select().from(userMemories).orderBy(userMemories.updatedAt);
-    res.json(rows);
+    res.json({
+      memories: rows.map((r) => ({
+        topic: r.topic,
+        value: r.value,
+        sourceType: r.sourceType ?? null,
+        sourceRef: r.sourceRef ?? null,
+        updatedAt: r.updatedAt,
+      })),
+    });
   } catch (err) {
     res.status(500).json({ error: "Failed to load memories" });
   }

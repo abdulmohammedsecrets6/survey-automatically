@@ -34,6 +34,7 @@ import { ProjectHome, type ProjectHomeAction } from '@/components/projects/proje
 import type { ProjectSection } from '@/components/project-gallery';
 import { ProjectMemory } from '@/components/projects/project-memory';
 import { ProjectInstructions } from '@/components/projects/project-instructions';
+import { ProjectActivity } from '@/components/projects/project-activity';
 
 export default function Home() {
   const { t, lang } = useI18n();
@@ -1459,6 +1460,13 @@ export default function Home() {
 
           {activeProjectId && activeProjectView === 'instructions' && (
             <ProjectInstructions
+              projectId={activeProjectId}
+              onBack={() => setActiveProjectView('home')}
+            />
+          )}
+
+          {activeProjectId && activeProjectView === 'activity' && (
+            <ProjectActivity
               projectId={activeProjectId}
               onBack={() => setActiveProjectView('home')}
             />

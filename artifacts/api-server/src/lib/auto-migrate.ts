@@ -40,6 +40,8 @@ const CREATE_TABLES = [
   `CREATE TABLE IF NOT EXISTS "user_memories" (
     "topic" text PRIMARY KEY,
     "value" text NOT NULL,
+    "source_type" text,
+    "source_ref" text,
     "updated_at" timestamp NOT NULL DEFAULT now()
   )`,
 
@@ -352,6 +354,33 @@ const CREATE_TABLES = [
     "created_at" timestamp NOT NULL DEFAULT now(),
     "updated_at" timestamp NOT NULL DEFAULT now()
   )`,
+
+  // ── Project sharing (magic-link access to a project) ──────────
+  `CREATE TABLE IF NOT EXISTS "project_shares" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+    "access_token" uuid NOT NULL UNIQUE DEFAULT gen_random_uuid(),
+    "permission" text NOT NULL DEFAULT 'read',
+    "email" text,
+    "expires_at" timestamp,
+    "created_by" text,
+    "created_at" timestamp NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS "project_shares_project_idx" ON "project_shares" ("project_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_shares_token_idx" ON "project_shares" ("access_token")`,
+
+  // ── Project export jobs (snapshot → .zip download) ────────────
+  `CREATE TABLE IF NOT EXISTS "project_exports" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+    "status" text NOT NULL DEFAULT 'pending',
+    "file_url" text,
+    "error" text,
+    "expires_at" timestamp,
+    "created_at" timestamp NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS "project_exports_project_idx" ON "project_exports" ("project_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_exports_project_created_idx" ON "project_exports" ("project_id", "created_at")`,
 ];
 
 /**
@@ -427,6 +456,10 @@ const ALTER_TABLES = [
 
   // push_subscriptions
   `ALTER TABLE "push_subscriptions" ADD COLUMN IF NOT EXISTS "user_agent" text NOT NULL DEFAULT ''`,
+
+  // user_memories, provenance columns for source attribution
+  `ALTER TABLE "user_memories" ADD COLUMN IF NOT EXISTS "source_type" text`,
+  `ALTER TABLE "user_memories" ADD COLUMN IF NOT EXISTS "source_ref" text`,
 
   // gmail / spotify
   `ALTER TABLE "gmail_tokens" ADD COLUMN IF NOT EXISTS "email" text NOT NULL DEFAULT ''`,

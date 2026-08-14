@@ -468,6 +468,7 @@ const pendingProjectContexts = new Map<string, ProjectContext[]>();
 /** Extract memorable facts from the user's message and upsert them into memory */
 async function extractAndStoreMemories(
   requestId: string,
+  conversationId: string,
   userMessage: string,
   assistantResponse: string,
 ): Promise<void> {
@@ -526,10 +527,21 @@ Only save if the user EXPLICITLY says "my name is X", "I work as Y", "I live in 
       if (!topic || !value) continue;
       await db
         .insert(userMemories)
-        .values({ topic, value, updatedAt: new Date() })
+        .values({
+          topic,
+          value,
+          sourceType: "conversation",
+          sourceRef: conversationId,
+          updatedAt: new Date(),
+        })
         .onConflictDoUpdate({
           target: userMemories.topic,
-          set: { value, updatedAt: new Date() },
+          set: {
+            value,
+            sourceType: "conversation",
+            sourceRef: conversationId,
+            updatedAt: new Date(),
+          },
         });
     }
   } catch {
@@ -1482,7 +1494,7 @@ router.post("/chat", async (req, res) => {
     // Fire-and-forget: extract memorable facts from this exchange. Normal chats
     // only, agent mode is isolated from the memory system entirely (it neither
     // reads nor writes memories).
-    if (agentMode !== "true") extractAndStoreMemories(requestId, sanitizedMessage, response).catch(() => {});
+    if (agentMode !== "true") extractAndStoreMemories(requestId, convId, sanitizedMessage, response).catch(() => {});
   } catch (err) {
     req.log.error({ err }, "LLM chat request failed");
     let msg = "Chat request failed. Please try again.";
