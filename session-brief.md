@@ -1,5 +1,5 @@
-# session-brief.md — Live Project State & Handoff
-
+# Session Brief — Infinity AI (formerly Jarvis)
+LAST_UPDATED: 2026-08-14
 > Read FIRST every session (alongside **KNOWLEDGE.md**). **Updated on EVERY change** — this is how sessions feel like one chat.
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
@@ -26,6 +26,7 @@ LAST_UPDATED: 2026-08-14 10:45
 - **Features:** chat (global memory + LLM auto-extraction ~chat.ts L448 + context injection ~L504), voice mode, camera detection, Build Studio (@Build shortcut, CodeMirror), Infinity Books, deep-research background jobs, Projects folder system, code editor, Infinity AI browser, music/Spotify, timers, Gmail/Calendar, command palette.
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
+- 2026-08-14: Rename Jarvis → Infinity AI complete (269 files). Backend routes/, config/, imports. Frontend artifact/, components/, hooks/, manifest.json. DB schema jarvisSettings→infinitySettings, owner enum. API spec /jarvis/→/infinity/ + regenerated clients. Docs updated. Pre-existing test errors unchanged.
 - 2026-08-13 Phase M (project activity) completed: frontend ActivityRecord component with cursor pagination + search + load-more + emoji icons, `projectActivity.*` i18n (17 keys EN/NL), gallery/home/home-page wiring for 'activity' section; logActivity integrated across all 7 mutating route files (projects, memories, instructions, tasks, research, conversations, files); Drizzle enum typing fixed with `as const`. Build passes.
 - 2026-08-12 Phase L (AI Context Pipeline) implemented: `lib/project-context.ts` assembles six scoped sources (identity, instructions, memory, files w/ text excerpt, history from other project chats, research runs) into the PROJECT CONTEXT block; `chat.ts` `buildProjectContext` now delegates to it; all queries strictly filtered by projectId. Phase I rename bug fixed (keyed on files.id, not join id). typecheck + build pass for both packages.
 - 2026-08-12 Chat-shell hardcoded-color cleanup verified: `pnpm run typecheck` and `git diff --check` pass; user bubble, header actions (GroupSettings/ConversationActions), voice/camera back buttons, and the settings avatar badge now use theme tokens instead of hardcoded light/dark hexes.
@@ -170,6 +171,7 @@ LAST_UPDATED: 2026-08-14 10:45
 - **Tests**: 6 integration tests PASS (5 required + 1 bonus), 0-euro Node --test + tsx runner
 
 ## Change record (newest first)
+- 2026-08-14: Rename Jarvis → Infinity AI complete (269 files). Backend routes/, config/, imports. Frontend artifact/, components/, hooks/, manifest.json. DB schema jarvisSettings→infinitySettings, owner enum. API spec /jarvis/→/infinity/ + regenerated clients. Docs updated. Pre-existing test errors unchanged.
 - 2026-08-14 Ran 6 agentic-loop integration tests (5 required + 1 bonus) — ALL PASS via `scripts/run-agent-tests.sh` (Node --test + tsx). Test file: `src/routes/infinity/__tests__/agent-loop-integration-direct.test.ts`.
 - 2026-08-14 Rewired build-studio.tsx to /build/agent SSE endpoint: replaced runAutoPipeline with runAgentLoop, removed IterateResponse, updated UI text, added 4 i18n keys EN+NL, typecheck+build PASS. Commit 2a7be1a (pushed to abdulmohammedsecrets6/survey-automatically branch agentic-build-development).
 - 2026-08-13 Phase M (project activity) completed: frontend ActivityRecord component with cursor pagination + search + load-more + emoji icons, `projectActivity.*` i18n (17 keys EN/NL), gallery/home/home-page wiring for 'activity' section; logActivity integrated across all 7 mutating route files (projects, memories, instructions, tasks, research, conversations, files); Drizzle enum typing fixed with `as const`. Build passes.
