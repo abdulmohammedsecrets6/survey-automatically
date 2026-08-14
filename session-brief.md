@@ -4,7 +4,7 @@ LAST_UPDATED: 2026-08-14
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
-LAST_UPDATED: 2026-08-14 11:00
+LAST_UPDATED: 2026-08-14 11:15
 
 ## Just did (last action)
 - Removed all Projects System status tracking from `session-brief.md` (Change record, Active threads, Project state, Next actions, Locked decisions) and deleted `docs/projects-system-plan.md`; the feature is already implemented and the plan is no longer needed. All working code (routes, schema, UI, i18n) remains intact.
@@ -126,6 +126,20 @@ LAST_UPDATED: 2026-08-14 11:00
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
 - Memory rule: no personal trivia — only project state, changes, and how-it-works.
 
+## Project feature backlog (new — from user)
+1. **Project Timeline** — chronological git-commit-style view of all project activity (conversations, files, memories, research, tasks); click an event → jump to that item.
+2. **Project Chatbot (read-only)** — conversational assistant with read-only access to everything in the project (chats, files, memories, research, etc.).
+3. **AI-generated Project FAQ** — auto-generated Q&A like "What's the goal of this project?" from project context.
+4. **Conflict Detection** — spot contradictions across sources (e.g., project memory says PostgreSQL but yesterday's chat says MongoDB).
+5. **"Explain This" on Mindmap** — click a connection (e.g., README.md ↔ memory) → AI explains the relationship.
+6. **Source Attribution** — every memory/fact shows exact provenance (which conversation, file, line, timestamp it came from).
+7. **Project Cleanup** — one-click scan for: duplicate files, outdated memories, unresolved questions, contradictory decisions.
+8. **Project Import/Export** — import from GitHub (and others); export entire project as `.zip`.
+9. **Project Sharing** — share a project with read-only or collaborator permissions.
+10. **Automations** — scheduled triggers (e.g., "Every Monday 09:00 → summarize today's Calendar agenda → push notification").
+11. **Connectors** — GitHub, Google Drive, Figma, Canva, Google Calendar, Gmail, etc. (replacing ad-hoc Settings integrations).
+12. **Infinity Overview Menu** — global dashboard showing everything Infinity AI is doing right now (researching, building, etc.).
+
 ## Open questions
 - Switch launcher to `claude --continue` for literal chat continuation? (not decided)
 
@@ -191,3 +205,17 @@ LAST_UPDATED: 2026-08-14 11:00
 ## Locked decisions
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
 - Memory rule: no personal trivia — only project state, changes, and how-it-works.
+
+## Project feature backlog (new — from user)
+1. **Project Timeline** — chronological git-commit-style view of all project activity (conversations, files, memories, research, tasks); click an event → jump to that item.
+2. **Project Chatbot (read-only)** — conversational assistant with read-only access to everything in the project (chats, files, memories, research, etc.).
+3. **AI-generated Project FAQ** — auto-generated Q&A like "What's the goal of this project?" from project context.
+4. **Conflict Detection** — spot contradictions across sources (e.g., project memory says PostgreSQL but yesterday's chat says MongoDB).
+5. **"Explain This" on Mindmap** — click a connection (e.g., README.md ↔ memory) → AI explains the relationship.
+6. **Source Attribution** — every memory/fact shows exact provenance (which conversation, file, line, timestamp it came from).
+7. **Project Cleanup** — one-click scan for: duplicate files, outdated memories, unresolved questions, contradictory decisions.
+8. **Project Import/Export** — import from GitHub (and others); export entire project as `.zip`.
+9. **Project Sharing** — share a project with read-only or collaborator permissions.
+10. **Automations** — scheduled triggers (e.g., "Every Monday 09:00 → summarize today's Calendar agenda → push notification").
+11. **Connectors** — GitHub, Google Drive, Figma, Canva, Google Calendar, Gmail, etc. (replacing ad-hoc Settings integrations).
+12. **Infinity Overview Menu** — global dashboard showing everything Infinity AI is doing right now (researching, building, etc.).
