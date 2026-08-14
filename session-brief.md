@@ -4,23 +4,15 @@ LAST_UPDATED: 2026-08-14
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
-LAST_UPDATED: 2026-08-14 10:45
+LAST_UPDATED: 2026-08-14 11:00
 
 ## Just did (last action)
-- Completed Phase M (step 15) — Project Activity feed frontend component with i18n, navigation integration, and logActivity wiring across all 7 mutating route files:
-  - Created `artifacts/infinity/src/components/projects/project-activity.tsx` with ActivityRecord interface, cursor-based pagination, search filtering, load more, emoji icons per type, localized date formatting
-  - Added `projectActivity.*` i18n namespace (17 keys EN + NL) to `artifacts/infinity/src/lib/i18n.tsx`
-  - Wired into project gallery (`activity` section + Activity icon), project home (`activity` action + recent activity card), and home page (`handleProjectAction` for 'activity')
-  - Fixed TypeScript errors in project-home.tsx (replaced payload.recentActivity with recentActivity state) and home.tsx (added 'activity' to activeProjectView union)
-  - logActivity integrated across: projects.ts, project-memories.ts, project-instructions.ts, project-tasks.ts, project-research.ts, conversations.ts, files.ts
-  - Fixed Drizzle enum typing in project-activity.ts VALID_TYPES with `as const`
-  - Build passes (typecheck + vite build)
+- Removed all Projects System status tracking from `session-brief.md` (Change record, Active threads, Project state, Next actions, Locked decisions) and deleted `docs/projects-system-plan.md`; the feature is already implemented and the plan is no longer needed. All working code (routes, schema, UI, i18n) remains intact.
 
 ## Project state — right now
 - **UI cleanup work:** core chat-shell cleanup is implemented and verified across toolbar, sidebar, Projects, conversation feed, and composer; remaining hardcoded light/dark colors were converted to theme tokens (user bubble, header actions, voice/camera back buttons, settings avatar badge).
 - **Build Studio progress work:** complete. The transcript is portaled out of the notice content, screenshot requests settle safely, accepted plans leave plan mode immediately, plan requests preserve earlier updates, pipeline terminal states remain visible, progress messages avoid nested state updates, and dismissed questions cannot strand the run.
 - **Continuity system:** `CLAUDE.md` routine + `KNOWLEDGE.md` (how it works) + `session-brief.md` (live state) replace the old 3 logs (archived in `archive/`). `source-code.ts` blocks KNOWLEDGE/session-brief from Infinity AI-the-app's source reading.
-- **Projects System:** 32-step user brief "persistent workspaces with isolated project memory". Steps 1–20 remain planned in `docs/projects-system-plan.md`, with **Phases B–H + I (project files) + L (AI Context Pipeline) + M (project activity) implemented**. Phases J–O remain planned. Awaiting steps 21–32.
 - **Infinity Books:** fully built + wired (schema, engine, routes, wizard, polling, A5 PDF verified). Pending: one live end-to-end run (needs server `.env`).
 - **DB (Drizzle, `lib/db/src/schema/`):** accounts · books · build-apps · conversations · files · gmail · groups · llm-keys · memories (global) · project-instructions (scoped) · project-memory (scoped) · projects (+projectChats/projectFiles/pins) · push · research · secrets · settings · sharing · spotify · timers.
 - **Features:** chat (global memory + LLM auto-extraction ~chat.ts L448 + context injection ~L504), voice mode, camera detection, Build Studio (@Build shortcut, CodeMirror), Infinity Books, deep-research background jobs, Projects folder system, code editor, Infinity AI browser, music/Spotify, timers, Gmail/Calendar, command palette.
@@ -124,17 +116,13 @@ LAST_UPDATED: 2026-08-14 10:45
 
 ## Active threads
 - **Build Studio reliability:** visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
-- **Projects System** — Phases B–H are implemented and verified; Phase I project files is next. Steps 21–32 are still awaited for the full-plan reconciliation.
 - **Infinity Books** — live end-to-end run pending (needs server `.env`).
 
 ## Next actions
 1. On the next UI-cleanup request, continue with the remaining overlay surfaces (settings panel rows, command palette, toasts) and the hardcoded terminal dark surfaces in Build Studio only if the user flags them.
-2. On the next Projects System request, read `docs/projects-system-plan.md` first and continue with Phase I project files, Phase J (project research), Phase K (project tasks), or the user-selected phase.
-3. When the user supplies steps 21–32, extend the plan faithfully and reconcile phases before implementing any newly affected scope.
-4. Optional: delete now-inert `.cron_watchdog.sh` / `.tmux_runner.sh` if user wants.
+2. Optional: delete now-inert `.cron_watchdog.sh` / `.tmux_runner.sh` if user wants.
 
 ## Locked decisions
-- Projects System: **plan-first** — build only after all 32 steps are planned (user instruction).
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
 - Memory rule: no personal trivia — only project state, changes, and how-it-works.
 
@@ -178,7 +166,6 @@ LAST_UPDATED: 2026-08-14 10:45
 
 ## Active threads
 - **Build Studio reliability:** visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
-- **Projects System** — Phases B–H are implemented and verified; Phase I project files is next. Steps 21–32 are still awaited for the full-plan reconciliation.
 - **Infinity Books** — live end-to-end run pending (needs server `.env`).
 
 ## Just did (last action)
@@ -194,16 +181,13 @@ LAST_UPDATED: 2026-08-14 10:45
 ## Project state — right now
 - **Google Stitch Phase 1**: COMPLETE — all 5 prompts + page inventory written to `docs/google-stitch-prompts/`
 - **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
-- **Projects System** — Phases B–H + I + L + M implemented and verified; Phase I project files is next. Steps 21–32 still awaited.
 - **Infinity Books** — live end-to-end run pending (needs server `.env`)
 
 ## Next actions
 1. Push agentic-build-development branch to abdulmohammedsecrets6/survey-automatically (already done this session)
-2. On the next Projects System request, read `docs/projects-system-plan.md` first and continue with Phase I project files
-3. Optional: delete now-inert `.cron_watchdog.sh` / `.tmux_runner.sh` if user wants
-4. When user requests Phase 2: use Google Stitch MCP to inspect generated designs and implement them
+2. Optional: delete now-inert `.cron_watchdog.sh` / `.tmux_runner.sh` if user wants
+3. When user requests Phase 2: use Google Stitch MCP to inspect generated designs and implement them
 
 ## Locked decisions
-- Projects System: **plan-first** — build only after all 32 steps are planned (user instruction).
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
 - Memory rule: no personal trivia — only project state, changes, and how-it-works.
