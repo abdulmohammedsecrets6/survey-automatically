@@ -1,5 +1,5 @@
 /**
- * Live context utilities, fetches real-world data to inject into Jarvis's system prompt.
+ * Live context utilities, fetches real-world data to inject into Infinity AI's system prompt.
  * All sources are free and require no API keys unless noted.
  */
 import { geocodeLocation, fetchOpenMeteoForecast, wmoCondition } from "./open-meteo";
@@ -182,7 +182,7 @@ export async function buildLiveContext(opts: {
   const [weatherResult, gmailResult] = await Promise.all([
     opts.weatherLocation ? getWeather(opts.weatherLocation) : Promise.resolve(null),
     opts.includeGmail
-      ? import("../routes/jarvis/gmail").then(m => m.getGmailContext()).catch(() => null)
+      ? import("../routes/infinity/gmail").then(m => m.getGmailContext()).catch(() => null)
       : Promise.resolve(null),
   ]);
 

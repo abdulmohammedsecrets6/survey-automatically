@@ -1,44 +1,44 @@
-# KNOWLEDGE.md — Jarvis Durable Knowledge
+# KNOWLEDGE.md — Infinity AI Durable Knowledge
 
 > Curated project memory. **Replaces** claude_changes_log.txt + .session_state.md + whats_next.md (archived in `archive/`).
 > Read alongside **session-brief.md** (the living working state). **UPDATE on change — never append.**
 > If a fact here is stale, edit it. If something durable happened, add it here (and note it in session-brief.md's recent conversation).
 
 ## Who & ground rules
-- Owner: **Kasper Kal** (kasperkal1970@gmail.com). GitHub: kasper-kal/Jarvis. Personal hobby project.
+- Owner: **Kasper Kal** (kasperkal1970@gmail.com). GitHub: kasper-kal/Infinity AI. Personal hobby project.
 - Budget: **every thing, service, API, hosting, library = 0 euro, permanently free, no free trials.**
 - Continuity: user wants every session to feel like one chat → **session-brief.md is the live state (updated every change)**; this file is the stable how-it-works reference.
 - **Memory rule: never store personal trivia** (titles, how to address the user, small talk). Only project state, change record, and how-it-works. Trivia like "sir" dies with the session by design.
 - User works in short, structured messages; dislikes stale/repetitive tracking noise.
 
 ## Repository map (reuse, don't rebuild)
-- Monorepo: `artifacts/api-server` (Express, port 8080) · `artifacts/jarvis` (React + Vite, port 5173) · `lib/db` (Drizzle package `@workspace/db`) · `Books/` (live style samples) · `scripts/` · `docs/` · `archive/` · `qa-report/`.
-- Stack: Drizzle ORM + Postgres (Neon), Express routers under `/api/jarvis/*`, React + Tailwind + framer-motion + lucide-react, i18n `en`/`nl` (type-enforced `nl: Record<keyof typeof en, string>`), Puppeteer (A5 PDFs, screenshots).
+- Monorepo: `artifacts/api-server` (Express, port 8080) · `artifacts/infinity` (React + Vite, port 5173) · `lib/db` (Drizzle package `@workspace/db`) · `Books/` (live style samples) · `scripts/` · `docs/` · `archive/` · `qa-report/`.
+- Stack: Drizzle ORM + Postgres (Neon), Express routers under `/api/infinity/*`, React + Tailwind + framer-motion + lucide-react, i18n `en`/`nl` (type-enforced `nl: Record<keyof typeof en, string>`), Puppeteer (A5 PDFs, screenshots).
 - DB schema: `lib/db/src/schema/` (one file per domain). Idempotent migrations: `lib/db/src/auto-migrate.ts` (`CREATE TABLE IF NOT EXISTS` + `ALTER ... ADD COLUMN IF NOT EXISTS`).
 - LLM key pool lives in server `.env` (gitignored): OpenRouter first, NVIDIA NIM failover; plus Whisper, Flux, ElevenLabs, Tavily, Spotify, Google.
 
 ### Existing systems to reuse (detail/reuse map: docs/projects-system-plan.md §1)
-- **Global memory** — `userMemories` (topic PK upsert) + `routes/jarvis/memories.ts` (GET/PATCH/DELETE) + LLM auto-extraction in chat.ts (~L448, upserts not duplicates) + memory-block injection into system prompt (~L504).
-- **Projects folder system** (base for the Projects upgrade) — schema `projects`/`projectChats`/`projectFiles`/`pins` in `lib/db/src/schema/projects.ts`; CRUD in `routes/jarvis/projects.ts`; UI `components/project-gallery.tsx` rendered in `chat-sidebar.tsx`.
-- **Background research jobs** — `researchJobs` schema + `routes/jarvis/research.ts` (queued/running/completed, progress/phase/log/notes/heartbeat, resume-on-boot pattern).
-- **Book Studio** = the reference full feature end-to-end (schema + auto-migrate + routes + wizard UI + ~45 `book.*` i18n keys + background polling + push notification).
+- **Global memory** — `userMemories` (topic PK upsert) + `routes/infinity/memories.ts` (GET/PATCH/DELETE) + LLM auto-extraction in chat.ts (~L448, upserts not duplicates) + memory-block injection into system prompt (~L504).
+- **Projects folder system** (base for the Projects upgrade) — schema `projects`/`projectChats`/`projectFiles`/`pins` in `lib/db/src/schema/projects.ts`; CRUD in `routes/infinity/projects.ts`; UI `components/project-gallery.tsx` rendered in `chat-sidebar.tsx`.
+- **Background research jobs** — `researchJobs` schema + `routes/infinity/research.ts` (queued/running/completed, progress/phase/log/notes/heartbeat, resume-on-boot pattern).
+- **Infinity Books** = the reference full feature end-to-end (schema + auto-migrate + routes + wizard UI + ~45 `book.*` i18n keys + background polling + push notification).
 - **Build Studio** — @Build chat shortcut, theme-aware editor, CodeMirror, browser agent, and a visible portaled progress transcript for plan, questions, scaffold, preview, screenshot, self-review, cancellation, and terminal error states.
-- **Jarvis-the-app must not read internal working docs** — blocked in `artifacts/api-server/src/lib/source-code.ts` (KNOWLEDGE.md, session-brief.md, jarvis config, .env, etc.).
+- **Infinity AI-the-app must not read internal working docs** — blocked in `artifacts/api-server/src/lib/source-code.ts` (KNOWLEDGE.md, session-brief.md, infinity config, .env, etc.).
 
 ## Active projects
 > Live status (what's done/in-flight/next) always lives in **session-brief.md** — this section holds only permanent facts.
-- **Book Studio** — permanent facts: full A5-PDF book generator (idea → plan → approve/"change something" → 10-page LLM chunks → 2 critique passes → A5 PDF + book.txt), BYO API key, push notification, background job. Built + verified.
-- **Projects System** — permanent facts: user's 32-step brief "persistent workspaces with isolated project memory"; full requirement capture (steps 1–20) + phases A–O in `docs/projects-system-plan.md`; Phases B–H are implemented and verified (project CRUD/search/sort/archive/open/pin, scoped conversation lifecycle/search, project home, isolated project memory CRUD/pinning/retrieval/extraction, bilingual Project Memory UI, ordered Project Instructions with chat injection, and first-class Projects navigation). Phase I (project files: upload/rename/delete/download/search + scoped `/api/jarvis/projects/:id/files` endpoint) is implemented and verified. Phase L (AI Context Pipeline) is implemented: `lib/project-context.ts` assembles six scoped sources (identity, instructions, memory, files, history, research) into the PROJECT CONTEXT block — all queries strictly filtered by projectId for isolation.
+- **Infinity Books** — permanent facts: full A5-PDF book generator (idea → plan → approve/"change something" → 10-page LLM chunks → 2 critique passes → A5 PDF + book.txt), BYO API key, push notification, background job. Built + verified.
+- **Projects System** — permanent facts: user's 32-step brief "persistent workspaces with isolated project memory"; full requirement capture (steps 1–20) + phases A–O in `docs/projects-system-plan.md`; Phases B–H are implemented and verified (project CRUD/search/sort/archive/open/pin, scoped conversation lifecycle/search, project home, isolated project memory CRUD/pinning/retrieval/extraction, bilingual Project Memory UI, ordered Project Instructions with chat injection, and first-class Projects navigation). Phase I (project files: upload/rename/delete/download/search + scoped `/api/infinity/projects/:id/files` endpoint) is implemented and verified. Phase L (AI Context Pipeline) is implemented: `lib/project-context.ts` assembles six scoped sources (identity, instructions, memory, files, history, research) into the PROJECT CONTEXT block — all queries strictly filtered by projectId for isolation.
 
 ## Decisions registry
-- 2026-08-12 Jarvis UI cleanup: the daily chat shell uses a restrained hierarchy with one toolbar action cluster, quieter grouped sidebar navigation, collapsed Projects by default, bounded conversation reading width, and a centered composer surface; every control surface uses the theme tokens — no hardcoded `bg-white dark:bg-[#...]` or hex bubble colors (user bubble = `bg-primary/10 dark:bg-primary/25`, toolbar/back buttons = `bg-card/80` + `border-border/50`). Deliberate brand colors stay (Studios hub per-studio tiles, Figma purple, Build Studio dark code surfaces).
-- 2026-08-12 Build Studio reliability: build progress is shown in a live Jarvis transcript rather than only a spinner/toast; plan acceptance closes plan mode before scaffolding, aborts are explicit cancellations, screenshot busy state is always released, and self-review is bounded.
-- 2026-08-12 Projects System Phase H: the existing Jarvis sidebar remains the global shell, while its Projects section provides scoped search/sort/archive/pin/rename/delete/create-from-chat/move actions and a compact project quick-access rail; unsupported project tools report honestly until their dedicated phases land.
-- 2026-08-12 Projects System Phase G: `project_instructions` is the canonical ordered rule store, exposed through strict project-scoped CRUD/reorder APIs and a bilingual Jarvis-native editor; mutations synchronize the legacy `projects.instructions` column, and project chat injects all rules with legacy fallback.
-- 2026-08-12 Projects System Phase F: Project Memory is a dedicated Jarvis-native view opened from the project home, with bilingual grouped CRUD/search/pin controls; it does not alter global chat navigation.
+- 2026-08-12 Infinity AI UI cleanup: the daily chat shell uses a restrained hierarchy with one toolbar action cluster, quieter grouped sidebar navigation, collapsed Projects by default, bounded conversation reading width, and a centered composer surface; every control surface uses the theme tokens — no hardcoded `bg-white dark:bg-[#...]` or hex bubble colors (user bubble = `bg-primary/10 dark:bg-primary/25`, toolbar/back buttons = `bg-card/80` + `border-border/50`). Deliberate brand colors stay (Studios hub per-studio tiles, Figma purple, Build Studio dark code surfaces).
+- 2026-08-12 Build Studio reliability: build progress is shown in a live Infinity AI transcript rather than only a spinner/toast; plan acceptance closes plan mode before scaffolding, aborts are explicit cancellations, screenshot busy state is always released, and self-review is bounded.
+- 2026-08-12 Projects System Phase H: the existing Infinity AI sidebar remains the global shell, while its Projects section provides scoped search/sort/archive/pin/rename/delete/create-from-chat/move actions and a compact project quick-access rail; unsupported project tools report honestly until their dedicated phases land.
+- 2026-08-12 Projects System Phase G: `project_instructions` is the canonical ordered rule store, exposed through strict project-scoped CRUD/reorder APIs and a bilingual Infinity AI-native editor; mutations synchronize the legacy `projects.instructions` column, and project chat injects all rules with legacy fallback.
+- 2026-08-12 Projects System Phase F: Project Memory is a dedicated Infinity AI-native view opened from the project home, with bilingual grouped CRUD/search/pin controls; it does not alter global chat navigation.
 - 2026-08-12 Projects System Phase E: `project_memories` is keyed by `(projectId, canonical key)`; retrieval is zero-cost keyword scoring with all pinned memories plus up to twelve relevant rows; project chats extract only durable project facts and never read/write global user memory.
 - 2026-08-12 Projects System Phase D: project chats are created transactionally, hidden from global conversation list/search, and receive project identity plus project instructions instead of global user-memory context; dedicated project-memory retrieval was completed in Phase E.
-- 2026-08-12 Projects System Phase C: implemented the scoped project-home aggregate and Jarvis-native dashboard, including project selection, back/continue/new-chat callbacks, and the useful empty state; preview remains stopped.
+- 2026-08-12 Projects System Phase C: implemented the scoped project-home aggregate and Infinity AI-native dashboard, including project selection, back/continue/new-chat callbacks, and the useful empty state; preview remains stopped.
 - 2026-08-12 Projects System Phase B: implemented backend project management and conversation move/remove APIs while leaving preview stopped; frontend wiring remains for later phases.
 - 2026-08-11 Repo cleanup: stale docs → `archive/`; deleted orphaned WhatsApp session + junk (c4ea241, 97aed33); extended `.gitignore`.
 - 2026-08-12 CLAUDE.md: removed AUTO-RESUME SYSTEM section + Chromebook note.

@@ -43,7 +43,7 @@ app.use("/api", router);
 // In development the Vite dev server handles the frontend; attempting to serve
 // the unbuilt dist folder here would throw ENOENT and produce spurious 500s.
 if (process.env["NODE_ENV"] !== "development") {
-  const staticDir = path.resolve(__dirname, "..", "..", "..", "artifacts", "jarvis", "dist", "public");
+  const staticDir = path.resolve(__dirname, "..", "..", "..", "artifacts", "infinity", "dist", "public");
   app.use(express.static(staticDir));
 
   // ── SPA fallback, any non-API, non-static request serves index.html ──

@@ -14,7 +14,7 @@ import { db, projectFiles, projects } from "@workspace/db";
 import { eq, desc, and, ilike } from "drizzle-orm";
 import { getStorage, persistFile, storageBackend, type FileKind, type FileOwner } from "../lib/storage";
 import { buildErrorDetail } from "../lib/error-detail";
-import { logActivity } from "./jarvis/project-activity";
+import { logActivity } from "./infinity/project-activity";
 
 const router = Router();
 
@@ -24,7 +24,7 @@ const upload = multer({
 });
 
 const VALID_KINDS: FileKind[] = ["image", "document", "audio", "build-app", "code"];
-const VALID_OWNERS: FileOwner[] = ["user", "jarvis", "account"];
+const VALID_OWNERS: FileOwner[] = ["user", "infinity", "account"];
 
 function escapeLike(value: string): string {
   return value.replace(/[\\%_]/g, "\\$&");

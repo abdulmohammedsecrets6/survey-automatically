@@ -27,7 +27,7 @@
 import OpenAI from "openai";
 import { db, llmKeys } from "@workspace/db";
 import { eq, asc, sql } from "drizzle-orm";
-import { jarvisConfig } from "../config/jarvis";
+import { infinityConfig } from "../config/infinity";
 import { logger } from "./logger";
 import { notifyAll } from "./web-push";
 
@@ -114,7 +114,7 @@ function envKeyEntries(): LlmKeyEntry[] {
       name: i === 1 ? "Env: primary LLM key" : `Env: LLM key #${i}`,
       baseUrl,
       apiKey,
-      model: jarvisConfig.llmModel,
+      model: infinityConfig.llmModel,
       enabled: true,
       priority: 100 - i,
       source: "env",
@@ -393,8 +393,8 @@ async function notifyAllKeysFailed(err: Error): Promise<void> {
   lastAllFailedNotifiedAt = now;
   try {
     await notifyAll(
-      "Jarvis failed with every API key",
-      "Every configured AI provider failed. Jarvis could not resume the request, please try again later.",
+      "Infinity AI failed with every API key",
+      "Every configured AI provider failed. Infinity AI could not resume the request, please try again later.",
       "/",
     );
   } catch {

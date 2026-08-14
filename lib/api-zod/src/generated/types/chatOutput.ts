@@ -7,6 +7,6 @@
  */
 
 export interface ChatOutput {
-  /** Jarvis's text response */
+  /** Infinity AI's text response */
   response: string;
 }

@@ -1,6 +1,6 @@
-# 🟢 Jarvis — Your Personal AI Voice Assistant
+# 🟢 Infinity AI — Your Personal AI Voice Assistant
 
-A polished, all-in-one AI assistant — **talk to Jarvis, chat with it, have it research deep topics, build code, edit photos, compose music, fact-check answers, and more.** Built as a monorepo with a React frontend, Express API backend, and PostgreSQL database.
+A polished, all-in-one AI assistant — **talk to Infinity AI, chat with it, have it research deep topics, build code, edit photos, compose music, fact-check answers, and more.** Built as a monorepo with a React frontend, Express API backend, and PostgreSQL database.
 
 > **One app to replace: ChatGPT · Gemini · Grok · Claude · Replit · Claude Code · Suno · Canva · Snopes — and more.**
 
@@ -9,10 +9,10 @@ A polished, all-in-one AI assistant — **talk to Jarvis, chat with it, have it 
 ## ✨ Features
 
 ### 🎙️ Voice & Chat
-- **Voice mode** — press the mic, speak, Jarvis answers out loud (Whisper STT → LLM → ElevenLabs TTS, British male voice)
+- **Voice mode** — press the mic, speak, Infinity AI answers out loud (Whisper STT → LLM → ElevenLabs TTS, British male voice)
 - **Chat mode** — streaming markdown conversations with SSE token-by-token output
 - **Wake word + clap detection** — hands-free activation (Chrome/Edge)
-- **Thinking mode** — Jarvis reasons privately first, shown in a collapsible `>` block before answering
+- **Thinking mode** — Infinity AI reasons privately first, shown in a collapsible `>` block before answering
 - **Agent mode** — research-style answers with live web search via Tavily
 
 ### 🧭 Studios Hub (Cmd+K or + menu → All Studios)
@@ -31,10 +31,10 @@ An organized launcher for every capability — no overwhelming menus:
 | **Data Lab** | Excel AI · NotebookLM |
 
 ### 🔬 Deep Research
-Multi-hour autonomous investigations: Jarvis plans phases, searches the web (Tavily), critiques gaps, replans, and grows its knowledge over time. Produces a definitive report and spawns a **Gem** — an expert persona chat grounded in the research dossier.
+Multi-hour autonomous investigations: Infinity AI plans phases, searches the web (Tavily), critiques gaps, replans, and grows its knowledge over time. Produces a definitive report and spawns a **Gem** — an expert persona chat grounded in the research dossier.
 
 ### 🔨 Build Mode
-A Linux workspace Jarvis can code in. The AI runs shell commands, creates files, and shows output in clean minimal **command cards** (no raw terminal clutter). Includes a file browser for the workspace.
+A Linux workspace Infinity AI can code in. The AI runs shell commands, creates files, and shows output in clean minimal **command cards** (no raw terminal clutter). Includes a file browser for the workspace.
 
 ### 🎨 Design Studio
 Client-side photo editor — upload or generate an image, then apply filters, crop, rotate, flip, add text, and download as PNG. Fully in-browser.
@@ -43,7 +43,7 @@ Client-side photo editor — upload or generate an image, then apply filters, cr
 Compose original tracks — pick a mood (Happy/Chill/Epic/Sad) and listen to a live Web Audio composition with pads, bass, plucks, and drums. 100% free, no server needed.
 
 ### ✅ Fact Check
-Every assistant message has a **ShieldCheck** button. Tap it and Jarvis splits the answer into claims, searches each against the web (Tavily), and shows per-claim verdicts with source links.
+Every assistant message has a **ShieldCheck** button. Tap it and Infinity AI splits the answer into claims, searches each against the web (Tavily), and shows per-claim verdicts with source links.
 
 ### 🧮 Smart Widgets
 Auto-detected from conversation and rendered inline:
@@ -63,10 +63,10 @@ Auto-detected from conversation and rendered inline:
 | "compose me a happy song" | Music composition player |
 
 ### 🤖 Agent Browser
-Give Jarvis a goal and it drives a real, visible browser — looking at screenshots, clicking, typing, scrolling, navigating step by step via a vision LLM.
+Give Infinity AI a goal and it drives a real, visible browser — looking at screenshots, clicking, typing, scrolling, navigating step by step via a vision LLM.
 
 ### 🗃️ Long-term Memory
-Jarvis remembers facts about you, supports 8 personality modes, custom system prompts, and reveals its identity as **Jarvis, built by Stark Industries** (never the real model name).
+Infinity AI remembers facts about you, supports 8 personality modes, custom system prompts, and reveals its identity as **Infinity AI, built by Stark Industries** (never the real model name).
 
 ---
 
@@ -76,7 +76,7 @@ Monorepo with **pnpm workspaces**:
 
 ```
 ├── artifacts/
-│   ├── jarvis/            # React + Vite frontend
+│   ├── infinity/            # React + Vite frontend
 │   └── api-server/        # Express 5 backend (port 8080)
 ├── lib/
 │   ├── api-client-react/  # Generated React hooks (OpenAPI)

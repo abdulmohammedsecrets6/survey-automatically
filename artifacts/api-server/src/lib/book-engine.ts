@@ -1,5 +1,5 @@
 /**
- * Book Studio — autonomous book-generation engine.
+ * Infinity Books — autonomous book-generation engine.
  *
  * Runs the whole pipeline in the background for one book job, mirroring the
  * Deep Research engine's shape (DB-persisted progress + heartbeat, frontend
@@ -153,7 +153,7 @@ async function callLLM(
 
 /* ── Plan generation (runs BEFORE a job row exists) ────────────────────── */
 
-const PLANNER_SYSTEM_PROMPT = `You are an expert book planner in a Book Studio. A reader gives you a book idea and a target page count; you turn it into a concrete chapter plan they approve before a single word is written.
+const PLANNER_SYSTEM_PROMPT = `You are an expert book planner in a Infinity Books. A reader gives you a book idea and a target page count; you turn it into a concrete chapter plan they approve before a single word is written.
 
 Respond with a SINGLE JSON object, nothing else, no markdown fences:
 {
@@ -228,7 +228,7 @@ function stripFences(raw: string): string {
 
 /* ── The pipeline ───────────────────────────────────────────────────────── */
 
-const BOOK_SYSTEM_PROMPT = `You are the author of a book being written in a Book Studio. You write ONLY the book's narrative prose — no commentary, no meta-narration, no notes to the author, no markdown fences.
+const BOOK_SYSTEM_PROMPT = `You are the author of a book being written in a Infinity Books. You write ONLY the book's narrative prose — no commentary, no meta-narration, no notes to the author, no markdown fences.
 
 Your rules:
 - Write in the book's specified language.
@@ -420,8 +420,8 @@ export function buildBookHtml(plan: BookPlan, manuscript: string): string {
   <div class="title-page">
     <div class="title">${escHtml(plan.title)}</div>
     <div class="rule"></div>
-    <div class="subtitle">${escHtml(plan.summary || "A book written with Jarvis")}</div>
-    <div class="credit">Generated with Jarvis · Book Studio</div>
+    <div class="subtitle">${escHtml(plan.summary || "A book written with Infinity AI")}</div>
+    <div class="credit">Generated with Infinity AI · Infinity Books</div>
   </div>
   <div class="toc-page">
     <div class="toc-heading">Contents</div>
@@ -563,7 +563,7 @@ export async function runBookJob(id: string): Promise<void> {
 
     await notifyAll(
       `Your book "${plan.title}" is ready 📚`,
-      `Download the A5 PDF and the manuscript from the Book Studio.`,
+      `Download the A5 PDF and the manuscript from the Infinity Books.`,
       `/`,
     );
   } catch (err) {

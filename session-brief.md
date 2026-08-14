@@ -8,8 +8,8 @@ LAST_UPDATED: 2026-08-14 10:45
 
 ## Just did (last action)
 - Completed Phase M (step 15) — Project Activity feed frontend component with i18n, navigation integration, and logActivity wiring across all 7 mutating route files:
-  - Created `artifacts/jarvis/src/components/projects/project-activity.tsx` with ActivityRecord interface, cursor-based pagination, search filtering, load more, emoji icons per type, localized date formatting
-  - Added `projectActivity.*` i18n namespace (17 keys EN + NL) to `artifacts/jarvis/src/lib/i18n.tsx`
+  - Created `artifacts/infinity/src/components/projects/project-activity.tsx` with ActivityRecord interface, cursor-based pagination, search filtering, load more, emoji icons per type, localized date formatting
+  - Added `projectActivity.*` i18n namespace (17 keys EN + NL) to `artifacts/infinity/src/lib/i18n.tsx`
   - Wired into project gallery (`activity` section + Activity icon), project home (`activity` action + recent activity card), and home page (`handleProjectAction` for 'activity')
   - Fixed TypeScript errors in project-home.tsx (replaced payload.recentActivity with recentActivity state) and home.tsx (added 'activity' to activeProjectView union)
   - logActivity integrated across: projects.ts, project-memories.ts, project-instructions.ts, project-tasks.ts, project-research.ts, conversations.ts, files.ts
@@ -19,21 +19,21 @@ LAST_UPDATED: 2026-08-14 10:45
 ## Project state — right now
 - **UI cleanup work:** core chat-shell cleanup is implemented and verified across toolbar, sidebar, Projects, conversation feed, and composer; remaining hardcoded light/dark colors were converted to theme tokens (user bubble, header actions, voice/camera back buttons, settings avatar badge).
 - **Build Studio progress work:** complete. The transcript is portaled out of the notice content, screenshot requests settle safely, accepted plans leave plan mode immediately, plan requests preserve earlier updates, pipeline terminal states remain visible, progress messages avoid nested state updates, and dismissed questions cannot strand the run.
-- **Continuity system:** `CLAUDE.md` routine + `KNOWLEDGE.md` (how it works) + `session-brief.md` (live state) replace the old 3 logs (archived in `archive/`). `source-code.ts` blocks KNOWLEDGE/session-brief from Jarvis-the-app's source reading.
+- **Continuity system:** `CLAUDE.md` routine + `KNOWLEDGE.md` (how it works) + `session-brief.md` (live state) replace the old 3 logs (archived in `archive/`). `source-code.ts` blocks KNOWLEDGE/session-brief from Infinity AI-the-app's source reading.
 - **Projects System:** 32-step user brief "persistent workspaces with isolated project memory". Steps 1–20 remain planned in `docs/projects-system-plan.md`, with **Phases B–H + I (project files) + L (AI Context Pipeline) + M (project activity) implemented**. Phases J–O remain planned. Awaiting steps 21–32.
-- **Book Studio:** fully built + wired (schema, engine, routes, wizard, polling, A5 PDF verified). Pending: one live end-to-end run (needs server `.env`).
+- **Infinity Books:** fully built + wired (schema, engine, routes, wizard, polling, A5 PDF verified). Pending: one live end-to-end run (needs server `.env`).
 - **DB (Drizzle, `lib/db/src/schema/`):** accounts · books · build-apps · conversations · files · gmail · groups · llm-keys · memories (global) · project-instructions (scoped) · project-memory (scoped) · projects (+projectChats/projectFiles/pins) · push · research · secrets · settings · sharing · spotify · timers.
-- **Features:** chat (global memory + LLM auto-extraction ~chat.ts L448 + context injection ~L504), voice mode, camera detection, Build Studio (@Build shortcut, CodeMirror), Book Studio, deep-research background jobs, Projects folder system, code editor, Jarvis browser, music/Spotify, timers, Gmail/Calendar, command palette.
+- **Features:** chat (global memory + LLM auto-extraction ~chat.ts L448 + context injection ~L504), voice mode, camera detection, Build Studio (@Build shortcut, CodeMirror), Infinity Books, deep-research background jobs, Projects folder system, code editor, Infinity AI browser, music/Spotify, timers, Gmail/Calendar, command palette.
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
 - 2026-08-13 Phase M (project activity) completed: frontend ActivityRecord component with cursor pagination + search + load-more + emoji icons, `projectActivity.*` i18n (17 keys EN/NL), gallery/home/home-page wiring for 'activity' section; logActivity integrated across all 7 mutating route files (projects, memories, instructions, tasks, research, conversations, files); Drizzle enum typing fixed with `as const`. Build passes.
 - 2026-08-12 Phase L (AI Context Pipeline) implemented: `lib/project-context.ts` assembles six scoped sources (identity, instructions, memory, files w/ text excerpt, history from other project chats, research runs) into the PROJECT CONTEXT block; `chat.ts` `buildProjectContext` now delegates to it; all queries strictly filtered by projectId. Phase I rename bug fixed (keyed on files.id, not join id). typecheck + build pass for both packages.
 - 2026-08-12 Chat-shell hardcoded-color cleanup verified: `pnpm run typecheck` and `git diff --check` pass; user bubble, header actions (GroupSettings/ConversationActions), voice/camera back buttons, and the settings avatar badge now use theme tokens instead of hardcoded light/dark hexes.
-- 2026-08-12 Jarvis composer cleanup: the input now uses a centered max-width surface with neutral theme tokens instead of competing hardcoded light/dark pill styles.
-- 2026-08-12 Jarvis conversation-feed cleanup: assistant content now sits in a bounded reading column, user bubbles have a readable maximum width, and feed spacing is less cramped.
-- 2026-08-12 Jarvis Projects cleanup: the Projects section starts collapsed so the conversation list remains the primary sidebar focus.
-- 2026-08-12 Jarvis sidebar cleanup: navigation is grouped, the workspace header is compact, and footer actions no longer compete with the top toolbar.
-- 2026-08-12 Jarvis UI cleanup started: HomeHeader now uses a single restrained toolbar hierarchy with consistent surfaces and an explicit New Chat action.
+- 2026-08-12 Infinity AI composer cleanup: the input now uses a centered max-width surface with neutral theme tokens instead of competing hardcoded light/dark pill styles.
+- 2026-08-12 Infinity AI conversation-feed cleanup: assistant content now sits in a bounded reading column, user bubbles have a readable maximum width, and feed spacing is less cramped.
+- 2026-08-12 Infinity AI Projects cleanup: the Projects section starts collapsed so the conversation list remains the primary sidebar focus.
+- 2026-08-12 Infinity AI sidebar cleanup: navigation is grouped, the workspace header is compact, and footer actions no longer compete with the top toolbar.
+- 2026-08-12 Infinity AI UI cleanup started: HomeHeader now uses a single restrained toolbar hierarchy with consistent surfaces and an explicit New Chat action.
 - 2026-08-12 Build Studio progress reliability verification passed: `pnpm run typecheck` and `git diff --check` are clean; production build was not run per Freebuff's no-unrequested-build rule, and preview remains stopped/not started.
 - 2026-08-12 Build Studio question-dialog dismissal now settles an unanswered waiting run as cancelled rather than leaving it stuck.
 - 2026-08-12 Durable Build Studio knowledge now documents the live progress transcript, explicit cancellation/error states, screenshot cleanup, and bounded self-review.
@@ -45,7 +45,7 @@ LAST_UPDATED: 2026-08-14 10:45
 - 2026-08-12 Build Studio screenshot requests now reset busy state in a finally block and treat aborts as a settled cancellation path.
 - 2026-08-12 Build Studio progress host decoupled from the normal notice content; the visible transcript is being finalized as a standalone overlay.
 - 2026-08-12 Build Studio progress wiring added: build lifecycle handlers now publish live transcript messages, abort active requests, surface errors, and stop after a bounded self-review limit.
-- 2026-08-12 Build Studio progress panel added: the transcript shows user request, Jarvis updates, elapsed timing, status, cancel, and close controls using the existing i18n system.
+- 2026-08-12 Build Studio progress panel added: the transcript shows user request, Infinity AI updates, elapsed timing, status, cancel, and close controls using the existing i18n system.
 - 2026-08-12 Build Studio progress foundation added: timed transcript state, cancellation refs, and explicit terminal states are ready for the visible build-progress chat panel.
 - 2026-08-12 Phase H final verification passed: typecheck, build, diff checks, and preview-status verification are complete; preview remains stopped with the saved commands intact.
 - 2026-08-12 Phase H build verification passed: typecheck and both workspace builds are clean; only pre-existing Vite sourcemap/chunk-size warnings remain, and preview stays stopped.
@@ -67,7 +67,7 @@ LAST_UPDATED: 2026-08-14 10:45
 - 2026-08-12 Phase G Home wiring added: the Project Home Instructions tile opens the dedicated view and Back returns to the project dashboard without changing global chat navigation.
 - 2026-08-12 Phase G bilingual Project Instructions view added: explicit rule list, add/edit/delete, reorder controls, empty/loading/error states, and a clear separation from Project Memory.
 - 2026-08-12 Phase G chat context now reads every dedicated instruction in project order, with safe fallback to the legacy instruction column when needed.
-- 2026-08-12 Phase G instruction router registered in the Jarvis API before the legacy project router; scoped endpoints are now reachable under `/api/jarvis/projects/:id/instructions`.
+- 2026-08-12 Phase G instruction router registered in the Infinity AI API before the legacy project router; scoped endpoints are now reachable under `/api/infinity/projects/:id/instructions`.
 - 2026-08-12 Phase G instruction APIs added: strict project-scoped list/add/edit/delete/reorder routes sync the legacy `projects.instructions` field while preserving existing rules.
 - 2026-08-12 Phase G auto-migration added: fresh and existing databases now receive the ordered `project_instructions` table and project/order index idempotently.
 - 2026-08-12 Phase G schema exported through `@workspace/db`, so server routes and chat context can use scoped project instructions; preview remains stopped.
@@ -79,7 +79,7 @@ LAST_UPDATED: 2026-08-14 10:45
 - 2026-08-12 Phase F plan and durable knowledge updated: the project plan and `KNOWLEDGE.md` now record the bilingual Project Memory view as implemented, with Phase G next.
 - 2026-08-12 Phase F bilingual copy added: all Project Memory controls and category/source labels are available in English and Dutch through the existing i18n contract.
 - 2026-08-12 Phase F Home integration added: the Project Home Memory tile opens the dedicated scoped memory view, and back navigation returns to the project dashboard without changing global chat navigation.
-- 2026-08-12 Phase F Project Memory view added: grouped cards, source labels, manual add form, search, inline edit, forget, and pin/unpin controls use the existing Jarvis visual system.
+- 2026-08-12 Phase F Project Memory view added: grouped cards, source labels, manual add form, search, inline edit, forget, and pin/unpin controls use the existing Infinity AI visual system.
 - 2026-08-12 Phase F started: Project Memory UI is the active implementation slice; preview remains stopped.
 - 2026-08-12 Phase E chat integration added: project context now retrieves scoped relevant/pinned memory, and project turns use project-keyed extraction while global chats retain global-memory extraction.
 - 2026-08-12 Phase E project-memory router registered ahead of global memory routes, preserving global-memory compatibility while keeping scoped mutations explicit.
@@ -116,7 +116,7 @@ LAST_UPDATED: 2026-08-14 10:45
 - 2026-08-12 Continuity redesign: KNOWLEDGE.md + session-brief.md replace the 3 old logs; CLAUDE.md routine updated; source-code.ts blockers updated (9ef62ab).
 - 2026-08-12 Projects System plan: `docs/projects-system-plan.md` written for steps 1–10 (4541abd).
 - 2026-08-12 CLAUDE.md cleanup: removed AUTO-RESUME SYSTEM + Chromebook note (2cbf5ae).
-- 2026-08-11 Book Studio: all 10 tasks done + verified (schema, engine, routes, wizard, polling, A5 PDF).
+- 2026-08-11 Infinity Books: all 10 tasks done + verified (schema, engine, routes, wizard, polling, A5 PDF).
 - 2026-08-11 Repo cleanup executed (c4ea241, 97aed33).
 - 2026-08-11 home.tsx split (2000→1520 lines) + nl i18n gaps filled.
 - 2026-08-11 `Books/` folder added (5 style samples; user updates it often — re-scan every session).
@@ -124,7 +124,7 @@ LAST_UPDATED: 2026-08-14 10:45
 ## Active threads
 - **Build Studio reliability:** visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
 - **Projects System** — Phases B–H are implemented and verified; Phase I project files is next. Steps 21–32 are still awaited for the full-plan reconciliation.
-- **Book Studio** — live end-to-end run pending (needs server `.env`).
+- **Infinity Books** — live end-to-end run pending (needs server `.env`).
 
 ## Next actions
 1. On the next UI-cleanup request, continue with the remaining overlay surfaces (settings panel rows, command palette, toasts) and the hardcoded terminal dark surfaces in Build Studio only if the user flags them.
@@ -148,10 +148,10 @@ LAST_UPDATED: 2026-08-14 10:45
   - TEST 4: Agent visually inspects UI (preview_screenshot returns clean "no preview" observation)
   - TEST 5: Agent iterates to completion (think + done reach terminal state)
   - BONUS: 3-step loop without LLM (read → patch → run, asserts 42 in output)
-  - Test file: `artifacts/api-server/src/routes/jarvis/__tests__/agent-loop-integration-direct.test.ts`
+  - Test file: `artifacts/api-server/src/routes/infinity/__tests__/agent-loop-integration-direct.test.ts`
   - Runner: `artifacts/api-server/scripts/run-agent-tests.sh` (uses Node --test + tsx, 0-euro)
 - Completed Phase: Rewire build-studio.tsx to /build/agent SSE endpoint (autonomous agentic loop)
-  - Replaced `runAutoPipeline` (one-shot whole-file regeneration per pass) with `runAgentLoop` consuming SSE from `/api/jarvis/build/agent`
+  - Replaced `runAutoPipeline` (one-shot whole-file regeneration per pass) with `runAgentLoop` consuming SSE from `/api/infinity/build/agent`
   - Added `AgentBuildEvent` + `AgentBuildResult` interfaces for SSE event types
   - Modified `doScaffold()`, `continueBuild()`, `toggleAfkMode()` to use `runAgentLoop`
   - Removed dead code: `runAutoPipeline` function and `IterateResponse` interface
@@ -160,7 +160,7 @@ LAST_UPDATED: 2026-08-14 10:45
   - Backend `/build/agent` endpoint (implemented in prior session) handles autonomous agent loop with 15 tools
   - `pnpm run typecheck`: PASSED
   - `pnpm run build`: PASSED
-  - Commit: 2a7be1a pushed to `abdulmohammedsecrets6/survey-automatically` on branch `agentic-build-development` (origin kasper-kal/Jarvis is read-only for this session's token)
+  - Commit: 2a7be1a pushed to `abdulmohammedsecrets6/survey-automatically` on branch `agentic-build-development` (origin kasper-kal/Infinity AI is read-only for this session's token)
 
 ## Project state — right now
 - **Build Studio agentic loop**: COMPLETE - frontend now consumes SSE from `/build/agent` endpoint for true autonomous agent behavior (inspect → edit → run commands → observe → iterate)
@@ -170,14 +170,14 @@ LAST_UPDATED: 2026-08-14 10:45
 - **Tests**: 6 integration tests PASS (5 required + 1 bonus), 0-euro Node --test + tsx runner
 
 ## Change record (newest first)
-- 2026-08-14 Ran 6 agentic-loop integration tests (5 required + 1 bonus) — ALL PASS via `scripts/run-agent-tests.sh` (Node --test + tsx). Test file: `src/routes/jarvis/__tests__/agent-loop-integration-direct.test.ts`.
+- 2026-08-14 Ran 6 agentic-loop integration tests (5 required + 1 bonus) — ALL PASS via `scripts/run-agent-tests.sh` (Node --test + tsx). Test file: `src/routes/infinity/__tests__/agent-loop-integration-direct.test.ts`.
 - 2026-08-14 Rewired build-studio.tsx to /build/agent SSE endpoint: replaced runAutoPipeline with runAgentLoop, removed IterateResponse, updated UI text, added 4 i18n keys EN+NL, typecheck+build PASS. Commit 2a7be1a (pushed to abdulmohammedsecrets6/survey-automatically branch agentic-build-development).
 - 2026-08-13 Phase M (project activity) completed: frontend ActivityRecord component with cursor pagination + search + load-more + emoji icons, `projectActivity.*` i18n (17 keys EN/NL), gallery/home/home-page wiring for 'activity' section; logActivity integrated across all 7 mutating route files (projects, memories, instructions, tasks, research, conversations, files); Drizzle enum typing fixed with `as const`. Build passes.
 
 ## Active threads
 - **Build Studio reliability:** visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
 - **Projects System** — Phases B–H are implemented and verified; Phase I project files is next. Steps 21–32 are still awaited for the full-plan reconciliation.
-- **Book Studio** — live end-to-end run pending (needs server `.env`).
+- **Infinity Books** — live end-to-end run pending (needs server `.env`).
 
 ## Next actions
 1. Push agentic-build-development branch to abdulmohammedsecrets6/survey-automatically (already done this session)

@@ -22,7 +22,7 @@ export const REPO_ROOT = ((): string => {
   return path.resolve(process.cwd(), "..");
 })();
 
-/** Files/dirs Jarvis must never read, secrets and his own runtime instructions. */
+/** Files/dirs Infinity AI must never read, secrets and his own runtime instructions. */
 // NOTE: dot-prefixed names must use (^|[/\\]) anchors, a leading `\b` never
 // matches before a `.` when it follows a `/`, which would leak .git/.env/etc.
 export const BLOCKED_PATTERNS: RegExp[] = [
@@ -33,7 +33,7 @@ export const BLOCKED_PATTERNS: RegExp[] = [
   /\bdist\b/,
   /\bcoverage\b/,
   // His own operating prompt, the exact code he's "currently using to work".
-  /config\/jarvis\.ts$/,
+  /config\/infinity\.ts$/,
   // Internal working docs — continuity state, not source code.
   /(^|[/\\])(KNOWLEDGE|session-brief)\.md$/,
   /(^|[/\\])\.daytona([/\\]|$)/,

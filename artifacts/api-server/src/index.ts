@@ -25,7 +25,7 @@ const [{ default: app }, { logger }, { ensureTables, ensureFilesTables }, { inje
     import("./app"),
     import("./lib/logger"),
     import("./lib/auto-migrate"),
-    import("./routes/jarvis/secrets"),
+    import("./routes/infinity/secrets"),
   ]);
 
 const rawPort = process.env["PORT"];
@@ -66,7 +66,7 @@ Promise.resolve().then(() => {
     logger.info({ port }, "Server listening");
     // NOTE: The Puppeteer browser is intentionally NOT launched at startup.
     // It is lazy-initialized on first browse/screenshot request (see getBrowser()
-    // in routes/jarvis/browse.ts). Eagerly launching a full Chrome instance at
+    // in routes/infinity/browse.ts). Eagerly launching a full Chrome instance at
     // boot was pushing the sandbox over its memory limit, causing OOM restarts
     // that killed the API server mid-conversation (voice mode errors).
   });

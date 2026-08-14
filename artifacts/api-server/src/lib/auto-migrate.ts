@@ -30,7 +30,7 @@ const CREATE_TABLES = [
   )`,
 
   // ── Settings (key → value store) ────────────────────────────
-  `CREATE TABLE IF NOT EXISTS "jarvis_settings" (
+  `CREATE TABLE IF NOT EXISTS "infinity_settings" (
     "key" text PRIMARY KEY,
     "value" text NOT NULL,
     "updated_at" timestamp NOT NULL DEFAULT now()
@@ -85,7 +85,7 @@ const CREATE_TABLES = [
     "completed_at" timestamp
   )`,
 
-  // ── Book Studio jobs ────────────────────────────────────────
+  // ── Infinity Books jobs ────────────────────────────────────────
   `CREATE TABLE IF NOT EXISTS "book_jobs" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "title" text NOT NULL DEFAULT 'Untitled book',
@@ -342,7 +342,7 @@ const CREATE_TABLES = [
     "expires_at" timestamp
   )`,
 
-  // ── Jarvis Build saved apps ────────────────────────────────────
+  // ── Infinity Build saved apps ────────────────────────────────────
   `CREATE TABLE IF NOT EXISTS "build_apps" (
     "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     "name" text NOT NULL,

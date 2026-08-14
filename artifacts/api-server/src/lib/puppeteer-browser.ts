@@ -1,11 +1,11 @@
 /**
- * Jarvis's Personal Browser, Puppeteer-based visible browser.
- * The user can see exactly what Jarvis is browsing, and can take control at any time.
+ * Infinity AI's Personal Browser, Puppeteer-based visible browser.
+ * The user can see exactly what Infinity AI is browsing, and can take control at any time.
  *
  * Architecture:
  * - Backend: Puppeteer browser instance, screenshot streaming via WebSocket
  * - Frontend: Browser viewer component showing live screenshots
- * - User can: watch Jarvis browse, see clicks/cursor, take over control
+ * - User can: watch Infinity AI browse, see clicks/cursor, take over control
  */
 
 import puppeteer, { Browser, Page } from "puppeteer";
@@ -155,7 +155,7 @@ export interface BrowseAction {
   payload?: string | { selector?: string; x?: number; y?: number; text?: string; dx?: number; dy?: number };
 }
 
-export class JarvisBrowser extends EventEmitter {
+export class InfinityBrowser extends EventEmitter {
   private browser: Browser | null = null;
   private page: Page | null = null;
   private wss: WebSocketServer | null = null;
@@ -196,24 +196,24 @@ export class JarvisBrowser extends EventEmitter {
     // Persistent profile, an ephemeral profile makes every session a brand-new
     // "first visit" (no cookies/localStorage), which is the #1 captcha magnet.
     // Falls back to ephemeral if the profile can't be opened (corrupt/locked).
-    // Set JARVIS_BROWSER_PROFILE_DIR to override the location, or
-    // JARVIS_BROWSER_HEADLESS=false to open a visible window on the host display
+    // Set INFINITY_BROWSER_PROFILE_DIR to override the location, or
+    // INFINITY_BROWSER_HEADLESS=false to open a visible window on the host display
     // (much less likely to be flagged as a bot).
     const profileDir =
-      process.env.JARVIS_BROWSER_PROFILE_DIR ||
-      path.join(os.homedir(), ".jarvis-browser-profile");
-    const headless = process.env.JARVIS_BROWSER_HEADLESS !== "false";
+      process.env.INFINITY_BROWSER_PROFILE_DIR ||
+      path.join(os.homedir(), ".infinity-browser-profile");
+    const headless = process.env.INFINITY_BROWSER_HEADLESS !== "false";
     // Optional unpacked Chrome extensions. Explicit paths win; otherwise any
-    // subfolders of ~/.jarvis-browser-extensions are loaded (that's where
+    // subfolders of ~/.infinity-browser-extensions are loaded (that's where
     // scripts/install-extensions.sh puts them). Loading extensions requires
     // dropping --single-process (extensions run in their own processes/service
     // workers), so the two are mutually exclusive.
-    let extensionPaths = (process.env.JARVIS_BROWSER_EXTENSIONS || "")
+    let extensionPaths = (process.env.INFINITY_BROWSER_EXTENSIONS || "")
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
     if (extensionPaths.length === 0) {
-      const extDir = path.join(os.homedir(), ".jarvis-browser-extensions");
+      const extDir = path.join(os.homedir(), ".infinity-browser-extensions");
       try {
         const fsMod = await import("fs");
         extensionPaths = fsMod
@@ -250,7 +250,7 @@ export class JarvisBrowser extends EventEmitter {
     try {
       this.browser = await puppeteer.launch(launchOpts);
     } catch (err) {
-      console.warn(`[Jarvis Browser] persistent profile failed, using ephemeral: ${(err as Error).message}`);
+      console.warn(`[Infinity Browser] persistent profile failed, using ephemeral: ${(err as Error).message}`);
       this.browser = await puppeteer.launch({ ...launchOpts, userDataDir: undefined });
     }
 
@@ -308,7 +308,7 @@ export class JarvisBrowser extends EventEmitter {
     });
 
     this.httpServer.listen(this.wsPort, () => {
-      console.log(`[Jarvis Browser] WebSocket server on ws://localhost:${this.wsPort}`);
+      console.log(`[Infinity Browser] WebSocket server on ws://localhost:${this.wsPort}`);
     });
   }
 
@@ -374,7 +374,7 @@ export class JarvisBrowser extends EventEmitter {
     this.updateState();
   }
 
-  // ── Actions that Jarvis (or the user) can perform ──
+  // ── Actions that Infinity AI (or the user) can perform ──
 
   /** Navigate to a URL */
   async navigate(url: string): Promise<void> {
@@ -455,9 +455,9 @@ export class JarvisBrowser extends EventEmitter {
         const size = ${cellSize};
         const cols = ${cols};
         const rows = ${rows};
-        document.getElementById("jarvis-grid-overlay")?.remove();
+        document.getElementById("infinity-grid-overlay")?.remove();
         const overlay = document.createElement("div");
-        overlay.id = "jarvis-grid-overlay";
+        overlay.id = "infinity-grid-overlay";
         overlay.style.cssText = "position:fixed;inset:0;z-index:2147483647;pointer-events:none;";
         const grid = document.createElement("div");
         grid.style.cssText = "position:absolute;inset:0;background-image:" +
@@ -500,7 +500,7 @@ export class JarvisBrowser extends EventEmitter {
             encoding: "base64",
           });
           await this.page!
-            .evaluate('document.getElementById("jarvis-grid-overlay")?.remove();')
+            .evaluate('document.getElementById("infinity-grid-overlay")?.remove();')
             .catch(() => {});
           return { image, cellSize, cols, rows };
         } catch (err) {
@@ -510,7 +510,7 @@ export class JarvisBrowser extends EventEmitter {
       }
       // Clean up the overlay on failure too.
       this.page
-        ?.evaluate('document.getElementById("jarvis-grid-overlay")?.remove();')
+        ?.evaluate('document.getElementById("infinity-grid-overlay")?.remove();')
         .catch(() => {});
       throw lastErr ?? new Error("Failed to capture grid screenshot");
     });
@@ -550,8 +550,8 @@ export class JarvisBrowser extends EventEmitter {
 
   /**
    * Extract a numbered list of interactive elements from the current page.
-   * Each element is tagged with `data-jarvis-idx` so the agent can click/type
-   * into it by stable selector (`[data-jarvis-idx="N"]`) on its next action —
+   * Each element is tagged with `data-infinity-idx` so the agent can click/type
+   * into it by stable selector (`[data-infinity-idx="N"]`) on its next action —
    * far more reliable than guessing pixel cells. Tags attach to the live DOM
    * and disappear automatically on navigation (new document).
    *
@@ -607,12 +607,12 @@ export class JarvisBrowser extends EventEmitter {
           if (out.length >= max || seen.has(el)) return;
           if (!isVisible(el)) return;
           if (!skipNested) {
-            const anc = el.closest && el.closest("[data-jarvis-idx]");
+            const anc = el.closest && el.closest("[data-infinity-idx]");
             if (anc && anc !== el) return;
           }
           const d = describe(el);
           if (!d) return;
-          el.setAttribute("data-jarvis-idx", String(out.length));
+          el.setAttribute("data-infinity-idx", String(out.length));
           seen.add(el);
           out.push({ index: out.length, tag: d.tag, text: d.text, hint: d.hint });
         };
@@ -639,7 +639,7 @@ export class JarvisBrowser extends EventEmitter {
             if (tag === "script" || tag === "style" || tag === "link" || tag === "meta" || tag === "head" || tag === "html") continue;
             // Cheap pre-filter before the expensive getComputedStyle: must have
             // some identifying content, and not already be covered.
-            if (el.closest && el.closest("[data-jarvis-idx]")) continue;
+            if (el.closest && el.closest("[data-infinity-idx]")) continue;
             if (!el.textContent && !(el.getAttribute && el.getAttribute("aria-label"))) continue;
             let cursor = "";
             try {

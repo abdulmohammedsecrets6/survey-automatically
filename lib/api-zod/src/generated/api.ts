@@ -30,7 +30,7 @@ export const TranscribeAudioResponse = zod.object({
 
 
 /**
- * @summary Send a message to Jarvis LLM
+ * @summary Send a message to Infinity AI LLM
  */
 export const SendMessageBody = zod.object({
   "messages": zod.array(zod.object({
@@ -41,7 +41,7 @@ export const SendMessageBody = zod.object({
 })
 
 export const SendMessageResponse = zod.object({
-  "response": zod.string().describe('Jarvis\'s text response')
+  "response": zod.string().describe('Infinity AI\'s text response')
 })
 
 

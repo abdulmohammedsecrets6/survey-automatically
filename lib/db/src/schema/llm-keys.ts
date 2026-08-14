@@ -2,7 +2,7 @@ import { pgTable, text, timestamp, uuid, integer, boolean } from "drizzle-orm/pg
 
 /**
  * LLM key pool — one row per provider credential.
- * Each entry pairs an API key with its base URL + model, so Jarvis can rotate
+ * Each entry pairs an API key with its base URL + model, so Infinity AI can rotate
  * across providers (NVIDIA NIM, OpenRouter, Groq, Google AI Studio, …) and
  * quarantine exhausted keys. Health/stats are tracked per row so a server
  * restart keeps the knowledge.
