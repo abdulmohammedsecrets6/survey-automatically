@@ -5,28 +5,17 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
 ## Just did (last action)
-- Completed **Phase 2.1 (Timeline UI enhancements)**:
-  - Added date-grouping (bucket by day) with day headers in `project-activity.tsx`
-  - Added type filter chips with multi-select dropdown (all 17 activity types)
-  - Added deep-link navigation via `onNavigate` callback to home.tsx (click conversation → loads in chat mode)
-  - Added `projectTimeline.unknownDate` i18n key (EN+NL)
-  - Fixed router import (removed incorrect `next/navigation`, now uses callback-based navigation)
-  - Typecheck + build pass for infinity artifact
-- Completed **Phase 2.2 (useProjectActivity hook)**:
-  - Created `artifacts/infinity/src/hooks/useProjectActivity.ts` with shared fetch logic
-  - Exports `useProjectActivity`, `useActivityFilter`, `useActivityGrouping`, `buildActivityLink`, `ACTIVITY_ICONS`, `getActivityIcon`
-  - Type-safe fetch with cursor pagination, AbortController support, auto-fetch, refetch
-- Completed **Phase 2.3 (Project Chatbot API)**:
-  - Created `artifacts/api-server/src/routes/infinity/project-chatbot.ts` (SSE streaming)
-  - Read-only assistant with full project context (all 6 sources via `buildProjectContextByProjectId`)
-  - Streams tokens via SSE, extracts citation sources ([memory:...], [file:...], etc.)
-  - Logs `agent_ran` activity
-- Completed **Phase 2.4 (Project Chatbot UI)**:
-  - Created `artifacts/infinity/src/components/projects/project-chatbot.tsx`
-  - Streaming chat interface with citation chips (inline + footer)
-  - Empty state with example prompts, error handling, stop/regenerate controls
-  - Added i18n keys for EN + NL (20+ keys)
-- Completed **Phase 2.5 (Wire chatbot into project home)**:
+- **Completed Phase 3.1 — Project FAQ API route** (`project-faq.ts`):
+  - Created `artifacts/api-server/src/routes/infinity/project-faq.ts` with POST `/projects/:id/faq/generate` and GET `/projects/:id/faq`
+  - Uses `buildProjectContextByProjectId` for full project context (all 6 sources)
+  - Prompts LLM for 8-12 Q&A pairs covering goals, stack, decisions, risks, next steps
+  - Returns structured JSON with source citations; caches in `projectFaqs` table
+  - Logs `faq_generated` activity via `logActivity()`
+- **Created `projectFaqs` schema** in `lib/db/src/schema/project-faq.ts` with JSONB FAQ array
+- **Extended auto-migrate** with `CREATE TABLE IF NOT EXISTS project_faqs` + indexes
+- **Mounted router** in `artifacts/api-server/src/routes/infinity/index.ts`
+- Typecheck passes for all NEW code (pre-existing test file errors unrelated)
+- **Completed Phase 2.5 — Wired Project Chatbot into project home & gallery** (earlier):
   - Extended `activeProjectView` type to include `'chatbot'`
   - Added chatbot render branch in `home.tsx`
   - Added `chatbot` to `ProjectHomeAction` type + action card in `project-home.tsx`
@@ -41,11 +30,13 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 - **Projects System Phase 2.3**: COMPLETE — Project Chatbot API (read-only SSE)
 - **Projects System Phase 2.4**: COMPLETE — Project Chatbot UI with citation chips
 - **Projects System Phase 2.5**: COMPLETE — Chatbot wired into project home & gallery
+- **Projects System Phase 3.1**: COMPLETE — Project FAQ API (generate + cached retrieval)
 - **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
 - **Infinity Books** — live end-to-end run pending (needs server `.env`)
 - **Google Stitch Phase 1**: COMPLETE — 5 prompts + page inventory written to `docs/google-stitch-prompts/`
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
+- 2026-08-14: Phase 3.1 — Created Project FAQ API (`project-faq.ts`): POST /projects/:id/faq/generate (LLM 8-12 Q&A with sources), GET /projects/:id/faq (cached), schema `projectFaqs` (JSONB), auto-migrate CREATE TABLE, router mounted, logs `faq_generated` activity
 - 2026-08-14: Phase 2.5 — Wired Project Chatbot into project home & gallery: added 'chatbot' to activeProjectView, ProjectHomeAction, ProjectSection; created chatbot action card in project-home.tsx + quick access in project-gallery.tsx; added i18n keys EN+NL
 - 2026-08-14: Phase 2.4 — Created Project Chatbot UI component (`project-chatbot.tsx`): streaming SSE chat, inline citation chips, footer source chips, empty state with examples, stop/regenerate, error handling; 20+ i18n keys EN+NL
 - 2026-08-14: Phase 2.3 — Created Project Chatbot API (`project-chatbot.ts`): POST /projects/:id/chatbot SSE stream, read-only assistant with full 6-source project context via buildProjectContextByProjectId, citation extraction, agent_ran activity logging
@@ -60,7 +51,6 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 - 2026-08-14: Rename Jarvis → Infinity AI complete (269 files). Backend routes/, config/, imports. Frontend artifact/, components/, hooks/, manifest.json. DB schema jarvisSettings→infinitySettings, owner enum. API spec /jarvis/→/infinity/ + regenerated clients. Docs updated. Pre-existing test errors unchanged.
 - 2026-08-14 Ran 6 agentic-loop integration tests (5 required + 1 bonus) — ALL PASS via `scripts/run-agent-tests.sh` (Node --test + tsx). Test file: `src/routes/infinity/__tests__/agent-loop-integration-direct.test.ts`.
 - 2026-08-14 Rewired build-studio.tsx to /build/agent SSE endpoint: replaced runAutoPipeline with runAgentLoop, removed IterateResponse, updated UI text, added 4 i18n keys EN+NL, typecheck+build PASS. Commit 2a7be1a (pushed to abdulmohammedsecrets6/survey-automatically branch agentic-build-development).
-- 2026-08-13 Phase M (project activity) completed: frontend ActivityRecord component with cursor pagination + search + load-more + emoji icons, `projectActivity.*` i18n (17 keys EN/NL), gallery/home/home-page wiring for 'activity' section; logActivity integrated across all 7 mutating route files (projects, memories, instructions, tasks, research, conversations, files); Drizzle enum typing fixed with `as const`. Build passes.
 - 2026-08-12 Phase L (AI Context Pipeline) implemented: `lib/project-context.ts` assembles six scoped sources (identity, instructions, memory, files w/ text excerpt, history from other project chats, research runs) into the PROJECT CONTEXT block; `chat.ts` `buildProjectContext` now delegates to it; all queries strictly filtered by projectId. Phase I rename bug fixed (keyed on files.id, not join id). typecheck + build pass for both packages.
 - 2026-08-12 Chat-shell hardcoded-color cleanup verified: `pnpm run typecheck` and `git diff --check` pass; user bubble, header actions (GroupSettings/ConversationActions), voice/camera back buttons, and the settings avatar badge now use theme tokens instead of hardcoded light/dark hexes.
 - 2026-08-12 Infinity AI composer cleanup: the input now uses a centered max-width surface with neutral theme tokens instead of competing hardcoded light/dark pill styles.
@@ -69,7 +59,7 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 
 ## Active threads
 - **Phase 2** (Timeline + Chatbot) — COMPLETE (2.1-2.5 done)
-- **Phase 3** (FAQ + Conflict Detection + Source Attribution) — ready to start
+- **Phase 3** (FAQ + Conflict Detection + Source Attribution) — **3.1 COMPLETE**, 3.2-3.5 ready to start
 - **Phase 4** (Mindmap + Cleanup) — can proceed in parallel with Phase 3
 - **Phase 5** (Connectors + Automations) — needs Phase 1 export schema + Phase 3 conflict detection
 - **Phase 6** (Sharing + Overview) — needs Phase 1 sharing + Phase 5 automation logging
@@ -78,11 +68,10 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 - **Google Stitch Phase 2** — await user request to use MCP to inspect generated designs and implement them
 
 ## Next actions
-1. **Start Phase 3.1** — Create `project-faq.ts` API route (POST `/projects/:id/faq/generate`) with LLM prompt for 8–12 Q&A pairs + source citations
-2. **Start Phase 3.2** — Create `project-faq.tsx` UI component (accordion list, regenerate button, source chips linking to sources)
-3. **Start Phase 3.3** — Create `project-conflicts.ts` API route (POST `/projects/:id/conflicts/scan` + GET) with LLM contradiction detection
-4. **Start Phase 3.4** — Create `project-conflicts.tsx` UI component (list with severity badges, expand to show claims+sources, resolve actions)
-5. **Start Phase 3.5** — Extend `project_memory` schema + `project-memory.ts` lib with `sourceLocation` JSONB for line-level provenance
+1. **Start Phase 3.2** — Create `project-faq.tsx` UI component (accordion list, regenerate button, source chips linking to sources)
+2. **Start Phase 3.3** — Create `project-conflicts.ts` API route (POST `/projects/:id/conflicts/scan` + GET) with LLM contradiction detection
+3. **Start Phase 3.4** — Create `project-conflicts.tsx` UI component (list with severity badges, expand to show claims+sources, resolve actions)
+4. **Start Phase 3.5** — Extend `project_memory` schema + `project-memory.ts` lib with `sourceLocation` JSONB for line-level provenance
 
 ## Locked decisions
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.

@@ -43,8 +43,8 @@
   11. **Connectors** — GitHub, Google Drive, Figma, Canva, Google Calendar, Gmail, etc. (replacing ad-hoc Settings integrations)
   12. **Infinity Overview Menu** — global dashboard showing everything Infinity AI is doing right now
   - **Phase 1 (Foundation & Activity Integration) — COMPLETE**: Activity view mounted, global memories have provenance columns (`sourceType`/`sourceRef`), activity `VALID_TYPES` extended with 8 new enum values, `projectShares` schema+API (GET/POST/DELETE `/projects/:id/shares`), `projectExports` schema+API (POST/GET export, POST import), EN+NL i18n keys for all 10 feature areas added.
-  - **Phase 2 (Timeline + Chatbot)** — Timeline UI enhancements, `useProjectActivity` hook, read-only chatbot API+UI
-  - **Phase 3 (Intelligence)** — FAQ generation, conflict detection, line-level source attribution
+  - **Phase 2 (Timeline + Chatbot) — COMPLETE**: Timeline UI (date grouping, type filters, deep-link nav), `useProjectActivity` hook, read-only chatbot API+UI (SSE streaming, citations)
+  - **Phase 3 (Intelligence)** — **3.1 COMPLETE**: FAQ generation API (`project-faq.ts`) with 8-12 Q&A pairs + source citations, cached retrieval. 3.2-3.5 pending.
   - **Phase 4 (Mindmap + Cleanup)** — connection graph inference, "Explain This" modal, cleanup scanner
   - **Phase 5 (Connectors + Automations)** — connector framework + sync jobs, automation scheduler + cron
   - **Phase 6 (Sharing + Overview)** — permission enforcement, public read-only view, system activity dashboard

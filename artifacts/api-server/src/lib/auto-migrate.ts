@@ -381,6 +381,16 @@ const CREATE_TABLES = [
   )`,
   `CREATE INDEX IF NOT EXISTS "project_exports_project_idx" ON "project_exports" ("project_id")`,
   `CREATE INDEX IF NOT EXISTS "project_exports_project_created_idx" ON "project_exports" ("project_id", "created_at")`,
+
+  // ── Project FAQ cache (AI-generated Q&A with sources) ─────────
+  `CREATE TABLE IF NOT EXISTS "project_faqs" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+    "faq" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "created_at" timestamp NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS "project_faqs_project_idx" ON "project_faqs" ("project_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_faqs_project_created_idx" ON "project_faqs" ("project_id", "created_at")`,
 ];
 
 /**
