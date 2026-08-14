@@ -1313,7 +1313,7 @@ async function verifyPatchTarget(workspaceId: string, relPath: string, search: s
 }
 
 /** Execute one agent tool call and return an observation string + ok flag. */
-async function executeAgentTool(
+export async function executeAgentTool(
   call: AgentToolCall,
   ctx: { workspaceId: string; sessionId: string; prompt: string; answers: Record<string, string> },
   events: AgentEvent[],

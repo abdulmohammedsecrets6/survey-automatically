@@ -4,7 +4,7 @@
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
-LAST_UPDATED: 2026-08-13 00:15
+LAST_UPDATED: 2026-08-14 10:45
 
 ## Just did (last action)
 - Completed Phase M (step 15) — Project Activity feed frontend component with i18n, navigation integration, and logActivity wiring across all 7 mutating route files:
@@ -139,3 +139,52 @@ LAST_UPDATED: 2026-08-13 00:15
 
 ## Open questions
 - Switch launcher to `claude --continue` for literal chat continuation? (not decided)
+
+## Just did (last action)
+- Ran 5 required integration tests (from original task spec) + 1 bonus end-to-end test for the agentic loop — ALL 6 PASS:
+  - TEST 1: Agent inspects codebase (list_files + read_file)
+  - TEST 2: Agent edits precisely (patch_file verifies target before mutating, rejects non-existent search)
+  - TEST 3: Agent runs terminal commands (run_terminal, observes exit 0 / exit 7)
+  - TEST 4: Agent visually inspects UI (preview_screenshot returns clean "no preview" observation)
+  - TEST 5: Agent iterates to completion (think + done reach terminal state)
+  - BONUS: 3-step loop without LLM (read → patch → run, asserts 42 in output)
+  - Test file: `artifacts/api-server/src/routes/jarvis/__tests__/agent-loop-integration-direct.test.ts`
+  - Runner: `artifacts/api-server/scripts/run-agent-tests.sh` (uses Node --test + tsx, 0-euro)
+- Completed Phase: Rewire build-studio.tsx to /build/agent SSE endpoint (autonomous agentic loop)
+  - Replaced `runAutoPipeline` (one-shot whole-file regeneration per pass) with `runAgentLoop` consuming SSE from `/api/jarvis/build/agent`
+  - Added `AgentBuildEvent` + `AgentBuildResult` interfaces for SSE event types
+  - Modified `doScaffold()`, `continueBuild()`, `toggleAfkMode()` to use `runAgentLoop`
+  - Removed dead code: `runAutoPipeline` function and `IterateResponse` interface
+  - Updated UI text: "Iteration {n}" → "Agent step {n} running..."; "Stop iterating" → "Stop agent"
+  - Added 4 i18n keys (activityAgentStarting, progressAgentStarting, activityPlanCreated, activityVerifying) in EN + NL
+  - Backend `/build/agent` endpoint (implemented in prior session) handles autonomous agent loop with 15 tools
+  - `pnpm run typecheck`: PASSED
+  - `pnpm run build`: PASSED
+  - Commit: 2a7be1a pushed to `abdulmohammedsecrets6/survey-automatically` on branch `agentic-build-development` (origin kasper-kal/Jarvis is read-only for this session's token)
+
+## Project state — right now
+- **Build Studio agentic loop**: COMPLETE - frontend now consumes SSE from `/build/agent` endpoint for true autonomous agent behavior (inspect → edit → run commands → observe → iterate)
+- **Agent tools**: 15 tools available (list_files, read_file, write_file, patch_file, rename_file, delete_file, run_terminal, search_files, replace_in_files, preview_screenshot, browser_action, run_tests, verify_claim, git_status, think, done)
+- **SSE event types**: plan, tool, observation, verify, done, error, result
+- **Budget**: 0 euro constraint satisfied - all code changes are local, no paid services added
+- **Tests**: 6 integration tests PASS (5 required + 1 bonus), 0-euro Node --test + tsx runner
+
+## Change record (newest first)
+- 2026-08-14 Ran 6 agentic-loop integration tests (5 required + 1 bonus) — ALL PASS via `scripts/run-agent-tests.sh` (Node --test + tsx). Test file: `src/routes/jarvis/__tests__/agent-loop-integration-direct.test.ts`.
+- 2026-08-14 Rewired build-studio.tsx to /build/agent SSE endpoint: replaced runAutoPipeline with runAgentLoop, removed IterateResponse, updated UI text, added 4 i18n keys EN+NL, typecheck+build PASS. Commit 2a7be1a (pushed to abdulmohammedsecrets6/survey-automatically branch agentic-build-development).
+- 2026-08-13 Phase M (project activity) completed: frontend ActivityRecord component with cursor pagination + search + load-more + emoji icons, `projectActivity.*` i18n (17 keys EN/NL), gallery/home/home-page wiring for 'activity' section; logActivity integrated across all 7 mutating route files (projects, memories, instructions, tasks, research, conversations, files); Drizzle enum typing fixed with `as const`. Build passes.
+
+## Active threads
+- **Build Studio reliability:** visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
+- **Projects System** — Phases B–H are implemented and verified; Phase I project files is next. Steps 21–32 are still awaited for the full-plan reconciliation.
+- **Book Studio** — live end-to-end run pending (needs server `.env`).
+
+## Next actions
+1. Push agentic-build-development branch to abdulmohammedsecrets6/survey-automatically (already done this session)
+2. On the next Projects System request, read `docs/projects-system-plan.md` first and continue with Phase I project files
+3. Optional: delete now-inert `.cron_watchdog.sh` / `.tmux_runner.sh` if user wants
+
+## Locked decisions
+- Projects System: **plan-first** — build only after all 32 steps are planned (user instruction).
+- Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
+- Memory rule: no personal trivia — only project state, changes, and how-it-works.
