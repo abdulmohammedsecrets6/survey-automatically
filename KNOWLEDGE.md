@@ -72,18 +72,15 @@
 ## Infinity AI — Grand Vision (user-provided, incorporated 2026-08-14)
 
 ### Core AI Philosophy
-Infinity AI is an **ambient, autonomous operating layer** that lives across the user's digital life. Not "an app you open" — it's a **persistent agent** that:
-- Runs continuously (background jobs, scheduled triggers, webhook listeners)
-- Observes everything the user permits (connectors: GitHub, Gmail, Calendar, Drive, Figma, Canva, Slack, Notion, etc.)
-- Acts proactively (automations: "Every Monday 09:00 summarize Calendar → push notification")
-- Remembers durably (project-scoped + global memory with full provenance)
-- Explains itself (every fact traceable to source; "Explain This" on mindmap edges)
-- Builds software end-to-end (Build Studio: plan → scaffold → preview → screenshot → self-review → iterate)
-- Is fully transparent (every AI action logged in activity feed + Overview Menu; git-style history)
-- Costs €0 to run (local-first, BYO keys, free-tier APIs only, self-hostable)
+Infinity AI is the **central AI**, not a collection of separate apps. Most capabilities live **inside the main chat** (~70% of functionality). Separate workspaces exist only for things needing large interfaces (code editor, deep website editor). Infinity understands natural language and auto-selects capabilities. Users can explicitly select capabilities with **`@`** (like ChatGPT): `@Build Make a website`, `@Research ...`. `/` is for **actions/tools/shortcuts**: `/Search`, `/Create image`, `/Browse`, `/Generate video`. Visual widgets appear **directly in the conversation** showing "what Infinity is currently doing" — not forcing users into another app.
 
 ### Plan → Review → Execute (the universal loop)
-Every non-trivial action follows: **Plan** (AI proposes, user approves/edits) → **Review** (AI self-critiques, shows diff/preview) → **Execute** (runs, streams progress, logs activity). Applies to: chat, research, build, automation, connector sync, export, cleanup, mindmap inference.
+For substantial actions:
+1. **User**: "Build a website for my coffee shop."
+2. **Infinity** asks for confirmation before beginning.
+3. **Infinity plans**: produces an actual plan (create homepage, menu, location, contact, generate imagery, responsive, test).
+4. **User gets two choices**: **Accept Plan** → execution begins, OR **Request Changes** → chat composer opens for edits ("Don't make menu separate, put on homepage + add online ordering"). Infinity updates plan. User iterates until satisfied.
+Applies to many consequential actions, not just websites.
 
 ### 17 Widget Types (Build Studio component palette)
 1. `Hero` — headline + subtext + CTA
@@ -91,55 +88,59 @@ Every non-trivial action follows: **Plan** (AI proposes, user approves/edits) �
 3. `TestimonialCarousel` — auto-rotating quotes
 4. `PricingTable` — tier comparison
 5. `FAQAccordion` — collapsible Q&A
-4. `StatsCounter` — animated numbers
-5. `LogoCloud` — partner/tech logos
-6. `CTABanner` — full-width conversion strip
-7. `TeamGrid` — avatars + roles
-8. `BlogPreview` — latest posts
-9. `ContactForm` — validated + honeypot
-10. `VideoEmbed` — YouTube/Vimeo/Loom
-11. `ComparisonTable` — us vs them
-12. `Timeline` — milestones
-13. `InteractiveDemo` — sandbox/iframe
-14. `NewsletterSignup` — email capture
-15. `TrustBadges` — security/compliance
-16. `Footer` — links + social + legal
-17. `CustomCode` — escape hatch for arbitrary React
+6. `StatsCounter` — animated numbers
+7. `LogoCloud` — partner/tech logos
+8. `CTABanner` — full-width conversion strip
+9. `TeamGrid` — avatars + roles
+10. `BlogPreview` — latest posts
+11. `ContactForm` — validated + honeypot
+12. `VideoEmbed` — YouTube/Vimeo/Loom
+13. `ComparisonTable` — us vs them
+14. `Timeline` — milestones
+15. `InteractiveDemo` — sandbox/iframe
+16. `NewsletterSignup` — email capture
+17. `TrustBadges` — security/compliance
+18. `Footer` — links + social + legal
+19. `CustomCode` — escape hatch for arbitrary React
 
 ### Build Flow (Build Studio)
 `@Build "landing page for X"` → **Planner** writes spec (widgets, copy, theme, responsive breakpoints) → **User approves/edits in chat** → **Scaffolder** writes Vite+React+Tailwind files to temp dir → **Preview Server** spins up (port 5173+) → **Puppeteer** screenshots (desktop/tablet/mobile) → **Self-Review Agent** critiques against spec (accessibility, contrast, copy fidelity, responsive behavior) → **Iterate** (max 3 rounds) → **User accepts** → **Export** (ZIP + deploy preview URL).
 
-### Website Versioning + Templates
-Every generated site gets a **versioned snapshot** (git commit + build artifact). Templates are **reusable Build specs** (not code) — user can "Start from SaaS template" → Planner adapts spec → same flow. Template marketplace is JSON specs, not repos.
+### Website Versioning
+Persistent versions/revisions: Default → User changes → Revision 2 → Revision 3 → Revision 4... Historical revisions remain intact, immutable. Users can roll back (creates new revision, doesn't destroy history). Reliable foundation for templates and AI modifications.
 
-### Self-Evolution (Inspect / Edit / Heal)
-Infinity AI can **read its own source** (except blocked docs), **propose changes** (via Build Studio), **run tests**, **commit**. User says "Fix the chat scrolling bug" → AI finds file, writes fix, runs typecheck/build, proposes PR. "Heal" = background watchdog: failed tests → auto-bisect → propose fix.
+### Apply Template
+User clicks **Apply** on a template → Infinity creates **private copy** for that user. Original Template → User A copy, User B copy, User C copy. Changes to one copy never affect others. Changes to original template don't unexpectedly modify existing copies.
 
-### Git Transparency
-Every AI action that mutates state creates a **signed commit** (author: `infinity-ai[bot]`). User sees full history in Timeline + Overview. "Revert this" = one click.
+### Infinity's Self-Evolution (Inspect / Edit / Heal)
+- **Inspect**: Infinity can **see its own code** (source, files, architecture, implementation) — it understands what makes Infinity work.
+- **Edit**: Infinity can **propose changes to itself** (via Build Studio). **Every individual code change requires user approval** — no unrestricted self-modification.
+- **Heal**: If Infinity gets an error → investigates → finds likely cause → proposes code change → user approves → applies → builds/tests → verifies fix. Potentially with rollback if change makes things worse.
+- **Self-Evolution**: Broader concept — Infinity isn't just getting updates from user; it can **evolve its own capabilities** through controlled code changes. "The features are infinite" — capabilities aren't permanently limited to what was originally shipped.
 
-### Promo Video Maker (Puppeteer + ElevenLabs + ASMR)
-User says "Make a 60s promo for this project" → AI writes script → ElevenLabs narrates (ASMR voice option) → Puppeteer drives generated site / dashboard / mindmap → records → stitches → MP4. Zero cost (local Puppeteer, free ElevenLabs tier).
+### Git/Code-Change Transparency
+For self-modification, visible process: "Infinity wants to make a change" → show files changed, lines added/removed, reason, proposed diff, tests, approval controls → **Reject / Review / Approve** → Build → Test → Verify → Commit/Rollback. Every AI action that mutates state creates a **signed commit** (author: `infinity-ai[bot]`). User sees full history in Timeline + Overview. "Revert this" = one click.
 
-### Browser Research (Deep Research Agent)
-"Research X" → spawns headless browser → crawls, scrolls, extracts, synthesizes → writes **research report** (markdown + sources) → stored in project research log → available to chatbot/FAQ/conflict detection.
+### Website Promo Video Maker (Major Feature)
+User supplies: website URL + script/text. Backend launches Puppeteer/Playwright → visits website → captures high-res screenshots/video, navigates, simulates mouse movements/clicks/keyboard input → records exact interaction timeline (timestamps for mouse movements, clicks, keystrokes, navigation). Script → ElevenLabs → voice-over (neutral British female, commercial/polished). ASMR audio composition synchronized to interaction timeline: mechanical keyboard taps, crisp mouse clicks, UI sounds, transitions, Infinity-specific sounds (error sound: "pu-pum?" — a questioning little sound). Cursor animation visually shows animated cursor corresponding to captured mouse movement. Final automated MP4 rendering combines: website captures, cursor animation, interaction timeline, ElevenLabs voice, keyboard sounds, mouse clicks, other sound effects, transitions → returns `.mp4` to user.
 
-### @/ Capability System
-`@github` → connector actions (create issue, read PR, list repos)
-`@calendar` → create event, find free slots
-`@memory` → "remember X", "what did I say about Y"
-`@build` → trigger Build Studio
-`@research` → start deep research
-`@export` → ZIP project
-`@share` → create share link
-`@automate` → create scheduled trigger
-Unified syntax across chat, automations, connectors.
+### Infinity Promo Video (Self-Promo)
+User types: **"Time to evolve..."** → black screen ~3 seconds → suddenly: **completely rebranded Infinity** with huge collection of new features appearing. Message: **"Infinity evolved."** Voice-over: neutral British female: **"The features are infinite."** Then: **"Infinite..."** with word echoing out. Ties directly into self-evolution concept.
+
+### Browser-Powered Business Research
+Infinity uses Puppeteer/Playwright to research user's real business: Memory ("Super Houses") → Search web → Find business website → Research public information → Find appropriate public/authorized assets → Adapt website. Goal: genuinely personalized, not generic. Respects image/content licensing.
 
 ### Unified Conversational Execution
-**One chat input does everything.** No mode switching. "Summarize today's meetings and create tasks" → AI calls Calendar connector, summarizes, creates project tasks, logs activity. "Build a dashboard for these metrics" → @build triggers. "Export this project and email it to X" → @export + @gmail.
+One chat input does everything. No mode switching. "Summarize today's meetings and create tasks" → AI calls Calendar connector, summarizes, creates project tasks, logs activity. "Build a dashboard for these metrics" → @build triggers. "Export this project and email it to X" → @export + @gmail. User goes from: Build website → Actually change hero → Research competitors → Make promo video — without leaving main conversation. Infinity internally switches capabilities while user stays in same conversational environment.
 
-### Visual Feedback Widgets
-Every long-running operation shows **live transcript** (Build Studio style): spinners are banned. Progress = structured log lines (plan → step → tool call → result → next). User can **interrupt** ("stop"), **redirect** ("actually use dark theme"), **inspect** (click any line → see raw tool I/O).
+### Deep Workspaces Still Exist
+Not eliminating every specialized interface. Full code editing, full website editing, large document/book editing, advanced design work can still open dedicated workspaces. But **chat is the central control layer**.
+
+### Visual Feedback Instead of Hidden Tool Calls
+Infinity's work becomes visible through widgets/components. Not "I am using Puppeteer..." → user sees **browser widget**. Not raw build logs → **Build widget**. Not raw code modifications → **Diff/approval widget**. Not raw video rendering → **Promo widget**. Interface communicates **state of the task visually**.
+
+### The Big Unifying Idea
+**Infinity isn't a bunch of features. Infinity is an AI that can acquire and orchestrate capabilities.** That's why "the features are infinite" fits the product architecture, not just marketing copy.
 
 ---
 

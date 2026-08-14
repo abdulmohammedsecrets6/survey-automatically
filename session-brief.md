@@ -1,10 +1,21 @@
 # Session Brief — Infinity AI (formerly Jarvis)
-LAST_UPDATED: 2026-08-14 (Phase 3.2 complete + i18n fix)
+LAST_UPDATED: 2026-08-14 (Grand Vision full incorporation into KNOWLEDGE.md)
 > Read FIRST every session (alongside **KNOWLEDGE.md**). **Updated on EVERY change** — this is how sessions feel like one chat.
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
 ## Just did (last action)
+- **Updated KNOWLEDGE.md Grand Vision section** with the complete detailed vision (28 sections covering: Core AI Philosophy as central chat-first AI, Plan→Review→Execute loop, 17 Widget Types, Build Flow, Website Versioning, Apply Template, Self-Evolution Inspect/Edit/Heal, Git Transparency, Promo Video Maker with ASMR/Puppeteer/ElevenLabs, Infinity Self-Promo video, Browser-Powered Business Research, Unified Conversational Execution, Deep Workspaces, Visual Feedback Widgets, Big Unifying Idea)
+- **Verified Phase 3.3 + 3.4 complete — Conflict Detection API + UI** (already implemented):
+  - API route: `artifacts/api-server/src/routes/infinity/project-conflicts.ts` with POST `/projects/:id/conflicts/scan` (LLM contradiction detection across all 6 sources) and GET `/projects/:id/conflicts` (cached retrieval)
+  - Schema: `lib/db/src/schema/project-conflicts.ts` with `projectConflicts` table (claimA, sourceA, claimB, sourceB, severity enum, resolved array, timestamps)
+  - UI component: `artifacts/infinity/src/components/projects/project-conflicts.tsx` with expandable conflict cards, severity badges, inline citation chips, resolve/dismiss actions
+  - Auto-migrate: `CREATE TABLE IF NOT EXISTS project_conflicts` with indexes
+  - Router mounted in `artifacts/api-server/src/routes/infinity/index.ts`
+  - Wired into `home.tsx` for `activeProjectView === 'conflicts'`
+  - Added `conflicts` to `ProjectHomeAction` + action card in `project-home.tsx`
+  - i18n keys complete (EN+NL) for `projectConflicts.*` and `projectHome.conflicts`/`projectHome.conflictsDesc`
+  - Typecheck + build pass for infinity artifact
 - **Fixed missing Dutch i18n keys** for `projectHome.conflicts` and `projectHome.conflictsDesc` in `artifacts/infinity/src/lib/i18n.tsx` — added translations to Dutch dictionary
 - **Completed Phase 3.2 — Project FAQ UI component** (`project-faq.tsx`):
   - Created `artifacts/infinity/src/components/projects/project-faq.tsx` with accordion list, regenerate button, source citation chips (inline + footer), empty state, cached indicator, loading state, error handling
@@ -39,11 +50,16 @@ LAST_UPDATED: 2026-08-14 (Phase 3.2 complete + i18n fix)
 - **Projects System Phase 2.5**: COMPLETE — Chatbot wired into project home & gallery
 - **Projects System Phase 3.1**: COMPLETE — Project FAQ API (generate + cached retrieval)
 - **Projects System Phase 3.2**: COMPLETE — Project FAQ UI (accordion, regenerate, source chips, full wiring)
+- **Projects System Phase 3.3**: COMPLETE — Conflict Detection API (POST `/projects/:id/conflicts/scan` + GET, LLM contradiction detection, `projectConflicts` table)
+- **Projects System Phase 3.4**: COMPLETE — Conflict Detection UI (expandable cards, severity badges, resolve/dismiss actions)
+- **Projects System Phase 3.5**: COMPLETE — Line-level Source Attribution (`sourceLocation` JSONB on `project_memories`, file/conversation/research/instruction provenance, updated extraction + display)
 - **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
 - **Infinity Books** — live end-to-end run pending (needs server `.env`)
 - **Google Stitch Phase 1**: COMPLETE — 5 prompts + page inventory written to `docs/google-stitch-prompts/`
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
+- 2026-08-14: Updated KNOWLEDGE.md Grand Vision section with complete detailed vision (28 sections: Core AI Philosophy, Plan→Review→Execute, 17 Widget Types, Build Flow, Website Versioning, Apply Template, Self-Evolution Inspect/Edit/Heal, Git Transparency, Promo Video Maker, Infinity Self-Promo, Browser-Powered Business Research, Unified Conversational Execution, Deep Workspaces, Visual Feedback Widgets, Big Unifying Idea)
+- 2026-08-14: Verified Phase 3.3-3.5 already fully implemented — Conflict Detection API (`project-conflicts.ts`), UI (`project-conflicts.tsx`), and Source Attribution (`sourceLocation` JSONB on `project_memories` with file/conversation/research/instruction types) all complete; infinity frontend typecheck + build PASS
 - 2026-08-14: Fixed missing Dutch i18n keys for `projectHome.conflicts` and `projectHome.conflictsDesc` in `i18n.tsx` — added translations to Dutch dictionary; infinity frontend typecheck + build PASS
 - 2026-08-14: Phase 3.2 — Completed Project FAQ UI (`project-faq.tsx`): accordion list, regenerate button, source chips (inline + footer), empty state, cached indicator, loading/error handling; added FAQ render branch in home.tsx; added `faq` to ProjectHomeAction + action card in project-home.tsx; added `projectHome.faq`/`projectHome.faqDesc` i18n keys EN+NL; typecheck+build PASS
 - 2026-08-14: Phase 3.1 — Created Project FAQ API (`project-faq.ts`): POST /projects/:id/faq/generate (LLM 8-12 Q&A with sources), GET /projects/:id/faq (cached), schema `projectFaqs` (JSONB), auto-migrate CREATE TABLE, router mounted, logs `faq_generated` activity
@@ -69,8 +85,8 @@ LAST_UPDATED: 2026-08-14 (Phase 3.2 complete + i18n fix)
 
 ## Active threads
 - **Phase 2** (Timeline + Chatbot) — COMPLETE (2.1-2.5 done)
-- **Phase 3** (FAQ + Conflict Detection + Source Attribution) — **3.1-3.2 COMPLETE**, 3.3-3.5 ready to start
-- **Phase 4** (Mindmap + Cleanup) — can proceed in parallel with Phase 3
+- **Phase 3** (FAQ + Conflict Detection + Source Attribution) — **COMPLETE (3.1-3.5 all done)**
+- **Phase 4** (Mindmap + Cleanup) — **NEXT TO START**
 - **Phase 5** (Connectors + Automations) — needs Phase 1 export schema + Phase 3 conflict detection
 - **Phase 6** (Sharing + Overview) — needs Phase 1 sharing + Phase 5 automation logging
 - **Build Studio reliability**: visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
@@ -78,9 +94,12 @@ LAST_UPDATED: 2026-08-14 (Phase 3.2 complete + i18n fix)
 - **Google Stitch Phase 2** — await user request to use MCP to inspect generated designs and implement them
 
 ## Next actions
-1. **Start Phase 3.3** — Create `project-conflicts.ts` API route (POST `/projects/:id/conflicts/scan` + GET) with LLM contradiction detection
-2. **Start Phase 3.4** — Create `project-conflicts.tsx` UI component (list with severity badges, expand to show claims+sources, resolve actions)
-3. **Start Phase 3.5** — Extend `project_memory` schema + `project-memory.ts` lib with `sourceLocation` JSONB for line-level provenance
+1. **Start Phase 4.1** — Create `project-mindmap.ts` schema (`projectConnections` table: nodeAType, nodeAId, nodeBType, nodeBId, relationship, confidence, inferredAt)
+2. **Start Phase 4.2** — Create `project-mindmap.ts` API route (POST `/projects/:id/mindmap/infer` + GET `/projects/:id/mindmap`) with LLM relationship extraction
+3. **Start Phase 4.3** — Create `project-mindmap.tsx` UI component (React Flow interactive graph; click edge → "Explain This" modal)
+4. **Start Phase 4.4** — Add "Explain This" endpoint (POST `/projects/:id/mindmap/explain`) in same route file
+5. **Start Phase 4.5** — Create `project-cleanup.ts` API route (POST `/projects/:id/cleanup/scan`: duplicate files, outdated memories, open questions, contradictions)
+6. **Start Phase 4.6** — Create `project-cleanup.tsx` UI component (tabbed results with Fix actions)
 
 ## Locked decisions
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.

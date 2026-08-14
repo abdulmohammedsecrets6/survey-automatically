@@ -407,6 +407,24 @@ const CREATE_TABLES = [
   )`,
   `CREATE INDEX IF NOT EXISTS "project_conflicts_project_idx" ON "project_conflicts" ("project_id")`,
   `CREATE INDEX IF NOT EXISTS "project_conflicts_detected_idx" ON "project_conflicts" ("detected_at")`,
+
+  // ── Project mindmap (connection graph) ────────────────────────
+  `CREATE TABLE IF NOT EXISTS "project_connections" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+    "node_a_type" text NOT NULL CHECK ("node_a_type" IN ('file', 'memory', 'instruction', 'task', 'research')),
+    "node_a_id" text NOT NULL,
+    "node_b_type" text NOT NULL CHECK ("node_b_type" IN ('file', 'memory', 'instruction', 'task', 'research')),
+    "node_b_id" text NOT NULL,
+    "relationship" text NOT NULL CHECK ("relationship" IN ('references', 'supports', 'contradicts', 'depends_on')),
+    "confidence" real NOT NULL DEFAULT 0.5,
+    "explanation" text,
+    "inferred_at" timestamp NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS "project_connections_project_idx" ON "project_connections" ("project_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_connections_node_a_idx" ON "project_connections" ("node_a_type", "node_a_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_connections_node_b_idx" ON "project_connections" ("node_b_type", "node_b_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_connections_dedup_idx" ON "project_connections" ("project_id", "node_a_type", "node_a_id", "node_b_type", "node_b_id", "relationship")`,
 ];
 
 /**

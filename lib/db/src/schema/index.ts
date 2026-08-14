@@ -19,6 +19,7 @@ export * from "./project-sharing";
 export * from "./project-export";
 export * from "./project-faq";
 export * from "./project-conflicts";
+export * from "./project-mindmap";
 export * from "./sharing";
 export * from "./accounts";
 export * from "./groups";

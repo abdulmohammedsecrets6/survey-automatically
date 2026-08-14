@@ -17,10 +17,11 @@ import {
   Sparkles,
   ListTodo,
   ShieldCheck,
+  GitBranch,
 } from 'lucide-react';
 import { useI18n, type TranslationKey } from '@/lib/i18n';
 
-export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts';
+export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap';
 
 interface ProjectSummary {
   id: string;
@@ -217,6 +218,14 @@ export function ProjectHome({
         description: t('projectHome.conflictsDesc'),
         count: 0,
         accent: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
+      },
+      {
+        action: 'mindmap' as const,
+        icon: GitBranch,
+        label: t('projectHome.mindmap'),
+        description: t('projectHome.mindmapDesc'),
+        count: 0,
+        accent: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20',
       },
     ];
   }, [payload, recentActivity, t]);
