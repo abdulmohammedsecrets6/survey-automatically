@@ -4,6 +4,7 @@ import {
   Archive,
   ArrowRight,
   Activity,
+  Bot,
   BrainCircuit,
   Check,
   ChevronDown,
@@ -38,7 +39,8 @@ export type ProjectSection =
   | 'research'
   | 'tasks'
   | 'instructions'
-  | 'activity';
+  | 'activity'
+  | 'chatbot';
 
 interface Project {
   id: string;
@@ -85,6 +87,7 @@ const quickAccessItems: { section: ProjectSection; icon: typeof Home; labelKey: 
   { section: 'tasks', icon: ListTodo, labelKey: 'projectGallery.tasks' },
   { section: 'instructions', icon: ShieldCheck, labelKey: 'projectGallery.instructions' },
   { section: 'activity', icon: Activity, labelKey: 'projectGallery.activity' },
+  { section: 'chatbot', icon: Bot, labelKey: 'projectGallery.chatbot' },
 ];
 
 function projectQueryUrl(query: string, sort: ProjectSort, includeArchived: boolean): string {

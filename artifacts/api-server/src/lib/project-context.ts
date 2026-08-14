@@ -281,3 +281,93 @@ export async function buildFullProjectContext(
     prompt: parts.join(newline + newline),
   };
 }
+
+/**
+ * Build the full six-source PROJECT CONTEXT block directly from a projectId
+ * (no conversation required). Used by the read-only Project Chatbot, which is
+ * not tied to a single conversation thread.
+ */
+export async function buildProjectContextByProjectId(
+  projectId: string,
+  userMessage: string,
+): Promise<BuiltProjectContext | null> {
+  const [project] = await db
+    .select({
+      projectId: projects.id,
+      name: projects.name,
+      description: projects.description,
+      instructions: projects.instructions,
+    })
+    .from(projects)
+    .where(eq(projects.id, projectId))
+    .limit(1);
+
+  if (!project) return null;
+
+  const newline = String.fromCharCode(10);
+  let instructions = project.instructions?.trim() ?? "";
+  try {
+    const instructionRows = await db
+      .select({ text: projectInstructions.text })
+      .from(projectInstructions)
+      .where(eq(projectInstructions.projectId, project.projectId))
+      .orderBy(asc(projectInstructions.sortOrder), asc(projectInstructions.createdAt));
+    const dedicatedInstructions = instructionRows.map((row) => row.text.trim()).filter(Boolean);
+    if (dedicatedInstructions.length > 0) instructions = dedicatedInstructions.join(newline);
+  } catch {
+    // Keep legacy project instructions available if the new table is not ready.
+  }
+
+  const identity = project.description?.trim()
+    ? `You are working inside the Infinity AI project '${project.name}'. Project description: ${project.description.trim()}`
+    : `You are working inside the Infinity AI project '${project.name}'.`;
+
+  const parts = ['## PROJECT CONTEXT' + newline + identity];
+
+  if (instructions) {
+    parts.push(
+      '## PROJECT INSTRUCTIONS' + newline +
+        'These are explicit rules for this project. Follow them whenever they apply:' + newline +
+        instructions,
+    );
+  }
+
+  // Source 3 — relevant project memory (Phase E engine).
+  try {
+    const memoryContext = await buildRelevantProjectMemoryContext(project.projectId, userMessage);
+    if (memoryContext) parts.push(memoryContext);
+  } catch (err) {
+    console.warn({ err, projectId: project.projectId }, "Project memory retrieval failed; continuing without it");
+  }
+
+  // Source 4 — relevant project files.
+  try {
+    const filesContext = await buildProjectFilesContext(project.projectId, userMessage);
+    if (filesContext) parts.push(filesContext);
+  } catch (err) {
+    console.warn({ err, projectId: project.projectId }, "Project files retrieval failed; continuing without it");
+  }
+
+  // Source 5 — relevant project conversation history (all project conversations).
+  try {
+    const historyContext = await buildProjectHistoryContext(project.projectId, "__none__", userMessage);
+    if (historyContext) parts.push(historyContext);
+  } catch (err) {
+    console.warn({ err, projectId: project.projectId }, "Project history retrieval failed; continuing without it");
+  }
+
+  // Source 6 — relevant research runs.
+  try {
+    const researchContext = await buildProjectResearchContext(project.projectId, userMessage);
+    if (researchContext) parts.push(researchContext);
+  } catch (err) {
+    console.warn({ err, projectId: project.projectId }, "Project research retrieval failed; continuing without it");
+  }
+
+  return {
+    projectId: project.projectId,
+    projectName: project.name,
+    conversationTitle: "",
+    prompt: parts.join(newline + newline),
+  };
+}

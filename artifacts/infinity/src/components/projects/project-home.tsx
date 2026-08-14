@@ -4,6 +4,7 @@ import {
   Activity,
   ArrowLeft,
   ArrowUpRight,
+  Bot,
   BrainCircuit,
   CheckCircle2,
   Clock3,
@@ -18,7 +19,7 @@ import {
 } from 'lucide-react';
 import { useI18n, type TranslationKey } from '@/lib/i18n';
 
-export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity';
+export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot';
 
 interface ProjectSummary {
   id: string;
@@ -191,6 +192,14 @@ export function ProjectHome({
         description: t('projectHome.recentActivityDesc'),
         count: recentActivity.length,
         accent: 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20',
+      },
+      {
+        action: 'chatbot' as const,
+        icon: Bot,
+        label: t('projectHome.chatbot'),
+        description: t('projectHome.chatbotDesc'),
+        count: 0,
+        accent: 'text-sky-500 bg-sky-500/10 border-sky-500/20',
       },
     ];
   }, [payload, recentActivity, t]);

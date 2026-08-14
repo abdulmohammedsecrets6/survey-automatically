@@ -6,6 +6,8 @@ import {
   Loader2,
   Search,
   X,
+  Filter,
+  ChevronDown,
 } from "lucide-react";
 import { useI18n, type TranslationKey } from "@/lib/i18n";
 
@@ -20,6 +22,7 @@ interface ActivityRecord {
 interface ProjectActivityProps {
   projectId: string;
   onBack: () => void;
+  onNavigate?: (path: string) => void;
 }
 
 const ACTIVITY_ICONS: Record<string, string> = {
@@ -34,7 +37,66 @@ const ACTIVITY_ICONS: Record<string, string> = {
   task_added: "✅",
   task_completed: "✅",
   agent_ran: "🤖",
+  faq_generated: "❓",
+  conflict_detected: "⚠️",
+  cleanup_ran: "🧹",
+  import_completed: "📥",
+  export_completed: "📤",
+  automation_triggered: "⚡",
+  connector_sync: "🔗",
+  shared_access: "🔒",
 };
+
+const ACTIVITY_TYPES = [
+  "project_created",
+  "conversation_started",
+  "file_uploaded",
+  "file_changed",
+  "research_completed",
+  "memory_added",
+  "memory_updated",
+  "instruction_added",
+  "task_added",
+  "task_completed",
+  "agent_ran",
+  "faq_generated",
+  "conflict_detected",
+  "cleanup_ran",
+  "import_completed",
+  "export_completed",
+  "automation_triggered",
+  "connector_sync",
+  "shared_access",
+] as const;
+
+/**
+ * Build a deep-link target for an activity record.
+ * Conversations → /c/:id; files → /files/:id; memories/research/tasks → project home.
+ */
+function buildActivityLink(item: ActivityRecord): string | null {
+  switch (item.type) {
+    case "conversation_started":
+    case "conversation_moved":
+    case "conversation_removed": {
+      const match = item.description.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+      return match ? `/c/${match[0]}` : null;
+    }
+    case "file_uploaded":
+    case "file_changed": {
+      const match = item.description.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+      return match ? `/files/${match[0]}` : null;
+    }
+    default:
+      return null;
+  }
+}
+
+/** Bucket an ISO timestamp into a day-key for date grouping. */
+function getDayKey(value: string): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "unknown";
+  return date.toISOString().slice(0, 10); // YYYY-MM-DD
+}
 
 function formatDate(value: string, locale: string): string {
   const date = new Date(value);
@@ -63,7 +125,7 @@ function asActivity(payload: unknown): ActivityRecord[] {
   return [];
 }
 
-export function ProjectActivity({ projectId, onBack }: ProjectActivityProps) {
+export function ProjectActivity({ projectId, onBack, onNavigate }: ProjectActivityProps) {
   const { t, lang } = useI18n();
   const locale = lang === "nl" ? "nl-NL" : "en-GB";
   const [activity, setActivity] = useState<ActivityRecord[]>([]);
@@ -73,6 +135,8 @@ export function ProjectActivity({ projectId, onBack }: ProjectActivityProps) {
   const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [hasMore, setHasMore] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set(ACTIVITY_TYPES));
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const loadActivity = useCallback(async (signal?: AbortSignal, cursor?: string) => {
     const isLoadingMore = !!cursor;
@@ -124,13 +188,47 @@ export function ProjectActivity({ projectId, onBack }: ProjectActivityProps) {
   }, [loadActivity, nextCursor, loadingMore, hasMore]);
 
   const filteredActivity = useMemo(() => {
-    if (!searchQuery.trim()) return activity;
+    let result = activity;
+    if (!selectedTypes.size || selectedTypes.size < ACTIVITY_TYPES.length) {
+      result = result.filter((a) => selectedTypes.has(a.type));
+    }
+    if (!searchQuery.trim()) return result;
     const q = searchQuery.toLowerCase();
-    return activity.filter((a) =>
+    return result.filter((a) =>
       a.description.toLowerCase().includes(q) ||
       a.type.toLowerCase().includes(q)
     );
-  }, [activity, searchQuery]);
+  }, [activity, searchQuery, selectedTypes]);
+
+  const groupedActivity = useMemo(() => {
+    const groups: { day: string; items: ActivityRecord[] }[] = [];
+    for (const item of filteredActivity) {
+      const day = getDayKey(item.createdAt);
+      const existing = groups.find((g) => g.day === day);
+      if (existing) {
+        existing.items.push(item);
+      } else {
+        groups.push({ day, items: [item] });
+      }
+    }
+    return groups;
+  }, [filteredActivity]);
+
+  const toggleType = useCallback((type: string) => {
+    setSelectedTypes((prev) => {
+      const next = new Set(prev);
+      if (next.has(type)) next.delete(type);
+      else next.add(type);
+      return next;
+    });
+  }, []);
+
+  const handleItemClick = useCallback((item: ActivityRecord) => {
+    const link = buildActivityLink(item);
+    if (link && onNavigate) {
+      onNavigate(link);
+    }
+  }, [onNavigate]);
 
   return (
     <div className="flex h-full min-h-0 flex-1 flex-col overflow-y-auto bg-background">
@@ -170,29 +268,63 @@ export function ProjectActivity({ projectId, onBack }: ProjectActivityProps) {
 
         <div className="mt-5">
           <div className="liquid-glass rounded-2xl border border-border/40 p-4">
-            <div className="flex items-center gap-2">
-              <label htmlFor="activity-search" className="sr-only">{t("projectActivity.searchPlaceholder")}</label>
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
-                <input
-                  id="activity-search"
-                  type="search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t("projectActivity.searchPlaceholder")}
-                  className="w-full rounded-xl border border-border/50 bg-background/70 pl-10 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground/50 hover:text-foreground"
-                    aria-label={t("projectActivity.clearSearch")}
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                )}
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-2">
+                <label htmlFor="activity-search" className="sr-only">{t("projectActivity.searchPlaceholder")}</label>
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground/50" />
+                  <input
+                    id="activity-search"
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={t("projectActivity.searchPlaceholder")}
+                    className="w-full rounded-xl border border-border/50 bg-background/70 pl-10 pr-4 py-2 text-sm text-foreground outline-none focus:border-primary/40"
+                  />
+                  {searchQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchQuery("")}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-muted-foreground/50 hover:text-foreground"
+                      aria-label={t("projectActivity.clearSearch")}
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setFilterOpen((v) => !v)}
+                  className="inline-flex items-center gap-1.5 rounded-xl border border-border/50 bg-background/70 px-3 py-2 text-sm font-medium text-foreground transition hover:border-primary/40"
+                  aria-expanded={filterOpen}
+                >
+                  <Filter className="h-4 w-4" />
+                  {t("projectTimeline.filterLabel")}
+                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${filterOpen ? "rotate-180" : ""}`} />
+                </button>
               </div>
+              {filterOpen && (
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {ACTIVITY_TYPES.map((type) => {
+                    const active = selectedTypes.has(type);
+                    return (
+                      <button
+                        key={type}
+                        type="button"
+                        onClick={() => toggleType(type)}
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition ${
+                          active
+                            ? "border-primary/40 bg-primary/10 text-foreground"
+                            : "border-border/50 bg-background/50 text-muted-foreground hover:border-primary/30"
+                        }`}
+                      >
+                        <span className="text-sm leading-none">{getActivityIcon(type)}</span>
+                        {getActivityLabel(type, t)}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -201,38 +333,56 @@ export function ProjectActivity({ projectId, onBack }: ProjectActivityProps) {
           <div className="flex min-h-[35vh] items-center justify-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin text-primary" />{t("projectActivity.loading")}</div>
         ) : filteredActivity.length === 0 ? (
           <motion.section initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="liquid-glass mt-5 flex min-h-[32vh] flex-col items-center justify-center rounded-3xl border border-border/40 p-8 text-center">
-            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500" style={{ fontSize: "2rem" }}>📋</span>
+            <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-500" style={{ fontSize: "2rem" }}>����</span>
             <h2 className="mt-4 text-lg font-semibold text-foreground">{t("projectActivity.emptyTitle")}</h2>
             <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">{t("projectActivity.emptyDescription")}</p>
           </motion.section>
         ) : (
-          <div className="mt-5 space-y-3">
-            {filteredActivity.map((item) => (
-              <motion.article
-                layout
-                key={item.id}
+          <div className="mt-5 space-y-5">
+            {groupedActivity.map((group) => (
+              <motion.section
+                key={group.day}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="liquid-glass rounded-2xl border border-border/40 p-4 transition hover:border-primary/30"
+                className="space-y-3"
               >
-                <div className="flex items-start gap-3">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-xl" style={{ fontSize: "1.5rem" }}>
-                    {getActivityIcon(item.type)}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-border/30" />
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <h3 className="text-sm font-medium text-foreground truncate">{getActivityLabel(item.type, t)}</h3>
-                    </div>
-                    <p className="mt-1 text-sm leading-5 text-muted-foreground/80">{item.description}</p>
-                    <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground/60">
-                      <span className="inline-flex items-center gap-1">
-                        <Clock className="h-3 w-3" />
-                        {formatDate(item.createdAt, locale)}
-                      </span>
-                    </div>
+                  <div className="relative flex justify-center text-xs uppercase tracking-wider text-muted-foreground/60">
+                    <span className="bg-background px-4">{group.day === "unknown" ? t("projectTimeline.unknownDate") : new Date(group.day + "T00:00:00").toLocaleDateString(locale, { weekday: "long", day: "numeric", month: "long", year: "numeric" })}</span>
                   </div>
                 </div>
-              </motion.article>
+                {group.items.map((item) => (
+                  <motion.article
+                    layout
+                    key={item.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="liquid-glass rounded-2xl border border-border/40 p-4 transition hover:border-primary/30 cursor-pointer"
+                    onClick={() => handleItemClick(item)}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-xl" style={{ fontSize: "1.5rem" }}>
+                        {getActivityIcon(item.type)}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="text-sm font-medium text-foreground truncate">{getActivityLabel(item.type, t)}</h3>
+                        </div>
+                        <p className="mt-1 text-sm leading-5 text-muted-foreground/80">{item.description}</p>
+                        <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground/60">
+                          <span className="inline-flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatDate(item.createdAt, locale)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.article>
+                ))}
+              </motion.section>
             ))}
 
             {hasMore && (

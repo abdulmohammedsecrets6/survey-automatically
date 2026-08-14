@@ -35,6 +35,7 @@ import type { ProjectSection } from '@/components/project-gallery';
 import { ProjectMemory } from '@/components/projects/project-memory';
 import { ProjectInstructions } from '@/components/projects/project-instructions';
 import { ProjectActivity } from '@/components/projects/project-activity';
+import { ProjectChatbot } from '@/components/projects/project-chatbot';
 
 export default function Home() {
   const { t, lang } = useI18n();
@@ -63,7 +64,7 @@ export default function Home() {
   }, [thinkingEnabled]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const [activeProjectView, setActiveProjectView] = useState<'home' | 'memory' | 'instructions' | 'activity'>('home');
+  const [activeProjectView, setActiveProjectView] = useState<'home' | 'memory' | 'instructions' | 'activity' | 'chatbot'>('home');
   const [sidebarRefreshTick, setSidebarRefreshTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -730,6 +731,10 @@ export default function Home() {
     }
     if (action === 'activity') {
       setActiveProjectView('activity');
+      return;
+    }
+    if (action === 'chatbot') {
+      setActiveProjectView('chatbot');
       return;
     }
     toast({ title: t('projectHome.actionComingSoon'), description: t('projectHome.actionComingSoonDesc') });
@@ -1469,6 +1474,15 @@ export default function Home() {
             <ProjectActivity
               projectId={activeProjectId}
               onBack={() => setActiveProjectView('home')}
+              onNavigate={(path) => {
+                if (path.startsWith('/c/')) {
+                  const id = path.slice(3);
+                  void loadConversation(id);
+                  setActiveProjectId(null);
+                  setMode('chat');
+                }
+                // File links (/files/:id) are not yet wired to a dedicated view.
+              }}
             />
           )}
 
@@ -1479,6 +1493,13 @@ export default function Home() {
               onContinueConversation={handleProjectContinue}
               onNewChat={handleProjectNewChat}
               onOpenAction={handleProjectAction}
+            />
+          )}
+
+          {activeProjectId && activeProjectView === 'chatbot' && (
+            <ProjectChatbot
+              projectId={activeProjectId}
+              onBack={() => setActiveProjectView('home')}
             />
           )}
 
