@@ -1,10 +1,11 @@
 # Session Brief — Infinity AI (formerly Jarvis)
-LAST_UPDATED: 2026-08-14 (Phase 3.2 complete)
+LAST_UPDATED: 2026-08-14 (Phase 3.2 complete + i18n fix)
 > Read FIRST every session (alongside **KNOWLEDGE.md**). **Updated on EVERY change** — this is how sessions feel like one chat.
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
 ## Just did (last action)
+- **Fixed missing Dutch i18n keys** for `projectHome.conflicts` and `projectHome.conflictsDesc` in `artifacts/infinity/src/lib/i18n.tsx` — added translations to Dutch dictionary
 - **Completed Phase 3.2 — Project FAQ UI component** (`project-faq.tsx`):
   - Created `artifacts/infinity/src/components/projects/project-faq.tsx` with accordion list, regenerate button, source citation chips (inline + footer), empty state, cached indicator, loading state, error handling
   - Added FAQ render branch in `home.tsx` for `activeProjectView === 'faq'`
@@ -43,6 +44,7 @@ LAST_UPDATED: 2026-08-14 (Phase 3.2 complete)
 - **Google Stitch Phase 1**: COMPLETE — 5 prompts + page inventory written to `docs/google-stitch-prompts/`
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
+- 2026-08-14: Fixed missing Dutch i18n keys for `projectHome.conflicts` and `projectHome.conflictsDesc` in `i18n.tsx` — added translations to Dutch dictionary; infinity frontend typecheck + build PASS
 - 2026-08-14: Phase 3.2 — Completed Project FAQ UI (`project-faq.tsx`): accordion list, regenerate button, source chips (inline + footer), empty state, cached indicator, loading/error handling; added FAQ render branch in home.tsx; added `faq` to ProjectHomeAction + action card in project-home.tsx; added `projectHome.faq`/`projectHome.faqDesc` i18n keys EN+NL; typecheck+build PASS
 - 2026-08-14: Phase 3.1 — Created Project FAQ API (`project-faq.ts`): POST /projects/:id/faq/generate (LLM 8-12 Q&A with sources), GET /projects/:id/faq (cached), schema `projectFaqs` (JSONB), auto-migrate CREATE TABLE, router mounted, logs `faq_generated` activity
 - 2026-08-14: Phase 2.5 — Wired Project Chatbot into project home & gallery: added 'chatbot' to activeProjectView, ProjectHomeAction, ProjectSection; created chatbot action card in project-home.tsx + quick access in project-gallery.tsx; added i18n keys EN+NL
