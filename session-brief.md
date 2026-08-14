@@ -91,7 +91,7 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 - Git push: use `mine` remote (abdulmohammedsecrets6/survey-automatically), NOT origin (kasper-kal/Infinity AI — read-only for this token).
 - After EVERY response: `git add -A && git commit -m "<what I just did>" && git push mine agentic-build-development`
 
-## Project feature backlog (new — from user)
+## Project feature backlog (new — from user, with Grand Vision context)
 1. **Project Timeline** — chronological git-commit-style view of all project activity (conversations, files, memories, research, tasks); click an event → jump to that item.
 2. **Project Chatbot (read-only)** — conversational assistant with read-only access to everything in the project (chats, files, memories, research, etc.).
 3. **AI-generated Project FAQ** — auto-generated Q&A like "What's the goal of this project?" from project context.
@@ -104,3 +104,5 @@ LAST_UPDATED: 2026-08-14 (Phases 2.1-2.5 complete)
 10. **Automations** — scheduled triggers (e.g., "Every Monday 09:00 → summarize today's Calendar agenda → push notification").
 11. **Connectors** — GitHub, Google Drive, Figma, Canva, Google Calendar, Gmail, etc. (replacing ad-hoc Settings integrations).
 12. **Infinity Overview Menu** — global dashboard showing everything Infinity AI is doing right now (researching, building, etc.).
+
+**Grand Vision incorporated into KNOWLEDGE.md:** Core AI Philosophy (ambient autonomous layer), Plan→Review→Execute loop, 17 Widget Types, Build Flow, Website Versioning/Templates, Self-Evolution (Inspect/Edit/Heal), Git Transparency, Promo Video Maker, Browser Research, @/ Capability System, Unified Conversational Execution, Visual Feedback Widgets.

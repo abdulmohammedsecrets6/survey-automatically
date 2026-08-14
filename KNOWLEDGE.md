@@ -68,3 +68,82 @@
 - Every UI string goes through `t()`, added to BOTH `en` + `nl`.
 - Work is "done" only when both apps typecheck + server bundles (unless a quick fix).
 - 0-euro budget everywhere, no free trials.
+
+## Infinity AI — Grand Vision (user-provided, incorporated 2026-08-14)
+
+### Core AI Philosophy
+Infinity AI is an **ambient, autonomous operating layer** that lives across the user's digital life. Not "an app you open" — it's a **persistent agent** that:
+- Runs continuously (background jobs, scheduled triggers, webhook listeners)
+- Observes everything the user permits (connectors: GitHub, Gmail, Calendar, Drive, Figma, Canva, Slack, Notion, etc.)
+- Acts proactively (automations: "Every Monday 09:00 summarize Calendar → push notification")
+- Remembers durably (project-scoped + global memory with full provenance)
+- Explains itself (every fact traceable to source; "Explain This" on mindmap edges)
+- Builds software end-to-end (Build Studio: plan → scaffold → preview → screenshot → self-review → iterate)
+- Is fully transparent (every AI action logged in activity feed + Overview Menu; git-style history)
+- Costs €0 to run (local-first, BYO keys, free-tier APIs only, self-hostable)
+
+### Plan → Review → Execute (the universal loop)
+Every non-trivial action follows: **Plan** (AI proposes, user approves/edits) → **Review** (AI self-critiques, shows diff/preview) → **Execute** (runs, streams progress, logs activity). Applies to: chat, research, build, automation, connector sync, export, cleanup, mindmap inference.
+
+### 17 Widget Types (Build Studio component palette)
+1. `Hero` — headline + subtext + CTA
+2. `FeatureGrid` — 3-col cards with icons
+3. `TestimonialCarousel` — auto-rotating quotes
+4. `PricingTable` — tier comparison
+5. `FAQAccordion` — collapsible Q&A
+4. `StatsCounter` — animated numbers
+5. `LogoCloud` — partner/tech logos
+6. `CTABanner` — full-width conversion strip
+7. `TeamGrid` — avatars + roles
+8. `BlogPreview` — latest posts
+9. `ContactForm` — validated + honeypot
+10. `VideoEmbed` — YouTube/Vimeo/Loom
+11. `ComparisonTable` — us vs them
+12. `Timeline` — milestones
+13. `InteractiveDemo` — sandbox/iframe
+14. `NewsletterSignup` — email capture
+15. `TrustBadges` — security/compliance
+16. `Footer` — links + social + legal
+17. `CustomCode` — escape hatch for arbitrary React
+
+### Build Flow (Build Studio)
+`@Build "landing page for X"` → **Planner** writes spec (widgets, copy, theme, responsive breakpoints) → **User approves/edits in chat** → **Scaffolder** writes Vite+React+Tailwind files to temp dir → **Preview Server** spins up (port 5173+) → **Puppeteer** screenshots (desktop/tablet/mobile) → **Self-Review Agent** critiques against spec (accessibility, contrast, copy fidelity, responsive behavior) → **Iterate** (max 3 rounds) → **User accepts** → **Export** (ZIP + deploy preview URL).
+
+### Website Versioning + Templates
+Every generated site gets a **versioned snapshot** (git commit + build artifact). Templates are **reusable Build specs** (not code) — user can "Start from SaaS template" → Planner adapts spec → same flow. Template marketplace is JSON specs, not repos.
+
+### Self-Evolution (Inspect / Edit / Heal)
+Infinity AI can **read its own source** (except blocked docs), **propose changes** (via Build Studio), **run tests**, **commit**. User says "Fix the chat scrolling bug" → AI finds file, writes fix, runs typecheck/build, proposes PR. "Heal" = background watchdog: failed tests → auto-bisect → propose fix.
+
+### Git Transparency
+Every AI action that mutates state creates a **signed commit** (author: `infinity-ai[bot]`). User sees full history in Timeline + Overview. "Revert this" = one click.
+
+### Promo Video Maker (Puppeteer + ElevenLabs + ASMR)
+User says "Make a 60s promo for this project" → AI writes script → ElevenLabs narrates (ASMR voice option) → Puppeteer drives generated site / dashboard / mindmap → records → stitches → MP4. Zero cost (local Puppeteer, free ElevenLabs tier).
+
+### Browser Research (Deep Research Agent)
+"Research X" → spawns headless browser → crawls, scrolls, extracts, synthesizes → writes **research report** (markdown + sources) → stored in project research log → available to chatbot/FAQ/conflict detection.
+
+### @/ Capability System
+`@github` → connector actions (create issue, read PR, list repos)
+`@calendar` → create event, find free slots
+`@memory` → "remember X", "what did I say about Y"
+`@build` → trigger Build Studio
+`@research` → start deep research
+`@export` → ZIP project
+`@share` → create share link
+`@automate` → create scheduled trigger
+Unified syntax across chat, automations, connectors.
+
+### Unified Conversational Execution
+**One chat input does everything.** No mode switching. "Summarize today's meetings and create tasks" → AI calls Calendar connector, summarizes, creates project tasks, logs activity. "Build a dashboard for these metrics" → @build triggers. "Export this project and email it to X" → @export + @gmail.
+
+### Visual Feedback Widgets
+Every long-running operation shows **live transcript** (Build Studio style): spinners are banned. Progress = structured log lines (plan → step → tool call → result → next). User can **interrupt** ("stop"), **redirect** ("actually use dark theme"), **inspect** (click any line → see raw tool I/O).
+
+---
+
+## Active projects (updated)
+- **12 New Project Features (Phases 1–6)** — detailed above with full vision context
+- **Phase 2 (Timeline + Chatbot)** — COMPLETE
+- **Phase 3 (Intelligence: FAQ + Conflict Detection + Source Attribution)** — READY TO START
