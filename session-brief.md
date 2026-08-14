@@ -4,207 +4,62 @@ LAST_UPDATED: 2026-08-14
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
-LAST_UPDATED: 2026-08-14 11:15
-
 ## Just did (last action)
-- Removed all Projects System status tracking from `session-brief.md` (Change record, Active threads, Project state, Next actions, Locked decisions) and deleted `docs/projects-system-plan.md`; the feature is already implemented and the plan is no longer needed. All working code (routes, schema, UI, i18n) remains intact.
+- Completed **Phase 1 (Foundation & Activity Integration)** of the 12-feature Projects plan:
+  - 1.1 Mounted `ProjectActivity` component in home.tsx (render branch for `activeProjectView === 'activity'`)
+  - 1.2 Added `sourceType`/`sourceRef` provenance columns to global `user_memories` table + populated in `chat.ts` extraction
+  - 1.3 Extended `VALID_TYPES` enum in `project-activity.ts` with 8 new types: `faq_generated`, `conflict_detected`, `cleanup_ran`, `import_completed`, `export_completed`, `automation_triggered`, `connector_sync`, `shared_access`
+  - 1.4 Created `projectShares` schema + API (GET/POST/DELETE `/projects/:id/shares`) with `accessToken` (uuid), `permission` enum (read|collaborator), `expiresAt`
+  - 1.5 Created `projectExports` schema + API (POST `/projects/:id/export`, GET `/projects/:id/export/:exportId/status`, GET `/projects/:id/export/:exportId/download`, POST `/projects/import`)
+  - 1.6 Added EN + NL i18n keys for all 10 new feature areas: timeline, chatbot, faq, conflict, cleanup, export, share, automation, connector, overview
+- All Phase 1 backend/schema work verified: `pnpm run typecheck` passes for infinity artifact, build passes
 
 ## Project state — right now
-- **UI cleanup work:** core chat-shell cleanup is implemented and verified across toolbar, sidebar, Projects, conversation feed, and composer; remaining hardcoded light/dark colors were converted to theme tokens (user bubble, header actions, voice/camera back buttons, settings avatar badge).
-- **Build Studio progress work:** complete. The transcript is portaled out of the notice content, screenshot requests settle safely, accepted plans leave plan mode immediately, plan requests preserve earlier updates, pipeline terminal states remain visible, progress messages avoid nested state updates, and dismissed questions cannot strand the run.
-- **Continuity system:** `CLAUDE.md` routine + `KNOWLEDGE.md` (how it works) + `session-brief.md` (live state) replace the old 3 logs (archived in `archive/`). `source-code.ts` blocks KNOWLEDGE/session-brief from Infinity AI-the-app's source reading.
-- **Infinity Books:** fully built + wired (schema, engine, routes, wizard, polling, A5 PDF verified). Pending: one live end-to-end run (needs server `.env`).
-- **DB (Drizzle, `lib/db/src/schema/`):** accounts · books · build-apps · conversations · files · gmail · groups · llm-keys · memories (global) · project-instructions (scoped) · project-memory (scoped) · projects (+projectChats/projectFiles/pins) · push · research · secrets · settings · sharing · spotify · timers.
-- **Features:** chat (global memory + LLM auto-extraction ~chat.ts L448 + context injection ~L504), voice mode, camera detection, Build Studio (@Build shortcut, CodeMirror), Infinity Books, deep-research background jobs, Projects folder system, code editor, Infinity AI browser, music/Spotify, timers, Gmail/Calendar, command palette.
+- **Projects System Phase 1**: COMPLETE — Activity view mounted, global memories have provenance, activity types extended, sharing/export infrastructure ready
+- **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
+- **Infinity Books** — live end-to-end run pending (needs server `.env`)
+- **Google Stitch Phase 1**: COMPLETE — 5 prompts + page inventory written to `docs/google-stitch-prompts/`
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
+- 2026-08-14: Phase 1.6 — Added EN + NL i18n keys for 10 new project features (timeline, chatbot, faq, conflict, cleanup, export, share, automation, connector, overview) in `artifacts/infinity/src/lib/i18n.tsx`
+- 2026-08-14: Phase 1.5 — Created `projectExports` schema + API (export/import endpoints), wired in `index.ts` + `auto-migrate.ts`
+- 2026-08-14: Phase 1.4 — Created `projectShares` schema + API (share CRUD endpoints), wired in `index.ts` + `auto-migrate.ts`
+- 2026-08-14: Phase 1.3 — Extended `VALID_TYPES` in `project-activity.ts` with 8 new enum values for upcoming features
+- 2026-08-14: Phase 1.2 — Added `sourceType`/`sourceRef` to `user_memories` schema + `memories.ts` route + `chat.ts` extraction
+- 2026-08-14: Phase 1.1 — Mounted `ProjectActivity` component in `home.tsx` for `activeProjectView === 'activity'`
 - 2026-08-14: Rename Jarvis → Infinity AI complete (269 files). Backend routes/, config/, imports. Frontend artifact/, components/, hooks/, manifest.json. DB schema jarvisSettings→infinitySettings, owner enum. API spec /jarvis/→/infinity/ + regenerated clients. Docs updated. Pre-existing test errors unchanged.
+- 2026-08-14 Ran 6 agentic-loop integration tests (5 required + 1 bonus) — ALL PASS via `scripts/run-agent-tests.sh` (Node --test + tsx). Test file: `src/routes/infinity/__tests__/agent-loop-integration-direct.test.ts`.
+- 2026-08-14 Rewired build-studio.tsx to /build/agent SSE endpoint: replaced runAutoPipeline with runAgentLoop, removed IterateResponse, updated UI text, added 4 i18n keys EN+NL, typecheck+build PASS. Commit 2a7be1a (pushed to abdulmohammedsecrets6/survey-automatically branch agentic-build-development).
 - 2026-08-13 Phase M (project activity) completed: frontend ActivityRecord component with cursor pagination + search + load-more + emoji icons, `projectActivity.*` i18n (17 keys EN/NL), gallery/home/home-page wiring for 'activity' section; logActivity integrated across all 7 mutating route files (projects, memories, instructions, tasks, research, conversations, files); Drizzle enum typing fixed with `as const`. Build passes.
 - 2026-08-12 Phase L (AI Context Pipeline) implemented: `lib/project-context.ts` assembles six scoped sources (identity, instructions, memory, files w/ text excerpt, history from other project chats, research runs) into the PROJECT CONTEXT block; `chat.ts` `buildProjectContext` now delegates to it; all queries strictly filtered by projectId. Phase I rename bug fixed (keyed on files.id, not join id). typecheck + build pass for both packages.
 - 2026-08-12 Chat-shell hardcoded-color cleanup verified: `pnpm run typecheck` and `git diff --check` pass; user bubble, header actions (GroupSettings/ConversationActions), voice/camera back buttons, and the settings avatar badge now use theme tokens instead of hardcoded light/dark hexes.
 - 2026-08-12 Infinity AI composer cleanup: the input now uses a centered max-width surface with neutral theme tokens instead of competing hardcoded light/dark pill styles.
 - 2026-08-12 Infinity AI conversation-feed cleanup: assistant content now sits in a bounded reading column, user bubbles have a readable maximum width, and feed spacing is less cramped.
 - 2026-08-12 Infinity AI Projects cleanup: the Projects section starts collapsed so the conversation list remains the primary sidebar focus.
-- 2026-08-12 Infinity AI sidebar cleanup: navigation is grouped, the workspace header is compact, and footer actions no longer compete with the top toolbar.
-- 2026-08-12 Infinity AI UI cleanup started: HomeHeader now uses a single restrained toolbar hierarchy with consistent surfaces and an explicit New Chat action.
-- 2026-08-12 Build Studio progress reliability verification passed: `pnpm run typecheck` and `git diff --check` are clean; production build was not run per Freebuff's no-unrequested-build rule, and preview remains stopped/not started.
-- 2026-08-12 Build Studio question-dialog dismissal now settles an unanswered waiting run as cancelled rather than leaving it stuck.
-- 2026-08-12 Durable Build Studio knowledge now documents the live progress transcript, explicit cancellation/error states, screenshot cleanup, and bounded self-review.
-- 2026-08-12 Build Studio progress message updates now use a ref-backed snapshot, avoiding state setters inside the progress-list updater.
-- 2026-08-12 Build Studio plan-ready and scaffold-start toasts no longer replace the live progress transcript.
-- 2026-08-12 Build Studio pipeline failures no longer overwrite the progress transcript with a separate toast; preview/screenshot notices are suppressed during the pipeline.
-- 2026-08-12 Build Studio plan requests now reuse the active progress run instead of restarting it from a stale progress-status closure.
-- 2026-08-12 Build Studio accepted plans now snapshot the approved plan, close plan mode immediately, and reject an empty prompt before scaffolding.
-- 2026-08-12 Build Studio screenshot requests now reset busy state in a finally block and treat aborts as a settled cancellation path.
-- 2026-08-12 Build Studio progress host decoupled from the normal notice content; the visible transcript is being finalized as a standalone overlay.
-- 2026-08-12 Build Studio progress wiring added: build lifecycle handlers now publish live transcript messages, abort active requests, surface errors, and stop after a bounded self-review limit.
-- 2026-08-12 Build Studio progress panel added: the transcript shows user request, Infinity AI updates, elapsed timing, status, cancel, and close controls using the existing i18n system.
-- 2026-08-12 Build Studio progress foundation added: timed transcript state, cancellation refs, and explicit terminal states are ready for the visible build-progress chat panel.
-- 2026-08-12 Phase H final verification passed: typecheck, build, diff checks, and preview-status verification are complete; preview remains stopped with the saved commands intact.
-- 2026-08-12 Phase H build verification passed: typecheck and both workspace builds are clean; only pre-existing Vite sourcemap/chunk-size warnings remain, and preview stays stopped.
-- 2026-08-12 Durable knowledge updated: `KNOWLEDGE.md` now records Phase H navigation as implemented and Phase I project files as the next gap.
-- 2026-08-12 Phase H plan updated: first-class project navigation, scoped management actions, quick access, and global-navigation boundaries are now documented as implemented.
-- 2026-08-12 Phase H typecheck passed after the Projects navigation/frontend wiring; backend and frontend workspace checks are clean.
-- 2026-08-12 Phase H typecheck fix: project conversation JSON is awaited before updating the chat cache, keeping the async loader valid.
-- 2026-08-12 Phase H Home wiring added: project shortcuts now open the project home, memory, instructions, or honest future-tool feedback; the project chat shortcut creates a scoped conversation without changing global chat navigation.
-- 2026-08-12 Phase H sidebar bridge added: `ChatSidebar` now forwards the active project and quick-access/new-project-chat callbacks into the upgraded Projects section.
-- 2026-08-12 Phase H bilingual Projects navigation copy added: project search, sort, archive, pin, rename, move, quick-access, and gallery labels now use the shared English/Dutch i18n dictionaries.
-- 2026-08-12 Phase H gallery typing cleanup: the new quick-access labels use the shared `TranslationKey` contract and unused navigation imports were removed.
-- 2026-08-12 Phase H Projects section upgraded: first-class scoped search/sort, archive visibility, pinning, inline rename, archive/delete actions, create-from-conversation, move-current-chat, and project quick-access controls are now in the sidebar; preview remains stopped.
-- 2026-08-12 Phase G legacy compatibility hardening verified: the legacy project PATCH path and dedicated instruction APIs remain synchronized; typecheck and build pass.
-- 2026-08-12 Phase G legacy compatibility completed: the existing project PATCH instruction contract now updates the dedicated ordered table transactionally, while dedicated mutations continue syncing the legacy column.
-- 2026-08-12 Durable knowledge corrected: the Projects System context boundary now records dedicated project instructions plus completed project-memory retrieval.
-- 2026-08-12 Phase G plan schema detail corrected: the project-instructions record now documents updated timestamps and legacy-column synchronization.
-- 2026-08-12 Phase G final diff/status verification passed; preview is stopped with the saved commands intact.
-- 2026-08-12 Phase G bilingual copy added: Project Instructions controls, ordering labels, empty states, and the explicit Memory distinction are available in English and Dutch through the existing i18n contract.
-- 2026-08-12 Phase G Home wiring added: the Project Home Instructions tile opens the dedicated view and Back returns to the project dashboard without changing global chat navigation.
-- 2026-08-12 Phase G bilingual Project Instructions view added: explicit rule list, add/edit/delete, reorder controls, empty/loading/error states, and a clear separation from Project Memory.
-- 2026-08-12 Phase G chat context now reads every dedicated instruction in project order, with safe fallback to the legacy instruction column when needed.
-- 2026-08-12 Phase G instruction router registered in the Infinity AI API before the legacy project router; scoped endpoints are now reachable under `/api/infinity/projects/:id/instructions`.
-- 2026-08-12 Phase G instruction APIs added: strict project-scoped list/add/edit/delete/reorder routes sync the legacy `projects.instructions` field while preserving existing rules.
-- 2026-08-12 Phase G auto-migration added: fresh and existing databases now receive the ordered `project_instructions` table and project/order index idempotently.
-- 2026-08-12 Phase G schema exported through `@workspace/db`, so server routes and chat context can use scoped project instructions; preview remains stopped.
-- 2026-08-12 Phase G verified: `pnpm run typecheck` and `pnpm run build` pass; only existing Vite sourcemap/chunk-size warnings remain, and preview stays stopped.
-- 2026-08-12 Phase G plan updated: `docs/projects-system-plan.md` now records the dedicated instruction table, APIs, UI, legacy compatibility, and chat injection as implemented.
-- 2026-08-12 Phase G started: added `project_instructions` relational schema with strict project FK, explicit rule text, ordering, and timestamps; preview remains stopped.
-- 2026-08-12 Phase F verified: `pnpm run typecheck`, `pnpm run build`, and `git diff --check` pass; only existing Vite sourcemap/chunk-size warnings remain, and preview stays stopped.
-- 2026-08-12 Phase F project-memory search broadened to match content, canonical keys, and categories for the UI's scoped search box.
-- 2026-08-12 Phase F plan and durable knowledge updated: the project plan and `KNOWLEDGE.md` now record the bilingual Project Memory view as implemented, with Phase G next.
-- 2026-08-12 Phase F bilingual copy added: all Project Memory controls and category/source labels are available in English and Dutch through the existing i18n contract.
-- 2026-08-12 Phase F Home integration added: the Project Home Memory tile opens the dedicated scoped memory view, and back navigation returns to the project dashboard without changing global chat navigation.
-- 2026-08-12 Phase F Project Memory view added: grouped cards, source labels, manual add form, search, inline edit, forget, and pin/unpin controls use the existing Infinity AI visual system.
-- 2026-08-12 Phase F started: Project Memory UI is the active implementation slice; preview remains stopped.
-- 2026-08-12 Phase E chat integration added: project context now retrieves scoped relevant/pinned memory, and project turns use project-keyed extraction while global chats retain global-memory extraction.
-- 2026-08-12 Phase E project-memory router registered ahead of global memory routes, preserving global-memory compatibility while keeping scoped mutations explicit.
-- 2026-08-12 Phase E isolated memory routes added: grouped project list, manual canonical-key upsert, scoped edit/delete, and pin/unpin endpoints, with compatibility mutations requiring projectId.
-- 2026-08-12 Phase E retrieval helper added: project-only keyword scoring selects up to twelve relevant memories and always includes pinned rows, with no vector/paid dependency.
-- 2026-08-12 Phase E auto-migration added: fresh and existing databases receive the scoped memory table plus canonical-key and project/pin indexes idempotently.
-- 2026-08-12 Phase E schema exported through `@workspace/db`, making the scoped memory table available to server routes and chat context.
-- 2026-08-12 Phase E schema added: `project_memories` has project FK isolation, category/content/key, source metadata, pinning, timestamps, and a per-project canonical-key unique index.
-- 2026-08-12 Phase E verified: `pnpm run typecheck`, `pnpm run build`, and `git diff --check` pass; the preview configuration remains saved but the preview is stopped.
-- 2026-08-12 Durable project knowledge updated: `KNOWLEDGE.md` records Phase E's canonical-key storage, pinned-plus-relevant retrieval, and project-only extraction boundary.
-- 2026-08-12 Phase E implementation completed: scoped schema/migration, CRUD/pin routes, keyword retrieval, project-only extraction, and context isolation are in place; final build verification is next; preview remains stopped.
-- 2026-08-12 Phase D completed and verified: scoped creation/list/search, project context injection, global-memory suppression, Home/sidebar wiring, `pnpm run typecheck`, `pnpm run build`, and `git diff --check` pass; preview remains stopped.
-- 2026-08-12 Phase D global isolation: unscoped conversation list/search excludes project-linked conversations so project chats do not appear in global history.
-- 2026-08-12 Phase D frontend/context wiring: Project Home uses transactional project creation, the sidebar requests scoped lists/searches, and chat injects project identity plus legacy instructions while suppressing global memory.
-- 2026-08-12 Phase D backend started: conversation creation accepts `projectId` transactionally; general list/search accept `projectId` and enforce project-scoped results.
-- 2026-08-12 Phase C completed and verified: dashboard conditional rendering, scoped home aggregate, project callbacks, empty state, `en`/`nl` copy, `pnpm run typecheck`, `pnpm run build`, and `git diff --check` all pass; preview remains stopped.
-- 2026-08-12 Phase C Home callbacks added: project chat creation uses existing conversation creation + Phase B move API; project navigation closes cleanly back to chat.
-- 2026-08-12 Phase C Home shell started: added project-dashboard state and ProjectHome integration point.
-- 2026-08-12 Phase C sidebar callback completed: `ChatSidebar` forwards project selection to the Home shell.
-- 2026-08-12 Phase C sidebar bridge added: Project Gallery now emits the selected project id so the Home shell can render its dashboard.
-- 2026-08-12 Phase C UI added: `components/projects/project-home.tsx` plus matching `en`/`nl` `projectHome.*` translation keys.
-- 2026-08-12 Phase C backend started: added scoped `/projects/:id/home` aggregation using existing project/conversation/file relationships, with explicit empty future sections.
-- 2026-08-12 Durable project knowledge updated: `KNOWLEDGE.md` now records Phase B as implemented and the remaining context-pipeline gaps.
-- 2026-08-12 Phase B verified: `pnpm run typecheck`, `pnpm run build`, and `git diff --check` pass; preview was not started.
-- 2026-08-12 Phase B plan status updated: `docs/projects-system-plan.md` now records the backend slice as implemented and remaining phases as planned.
-- 2026-08-12 Phase B typecheck fix: narrowed `req.params.id` in the shared `/chats` + `/conversations` handler.
-- 2026-08-12 Phase B routes implemented: first-class project management plus conversation↔project move/remove semantics, with project existence checks and project-scoped queries.
-- 2026-08-12 Phase B migration added: fresh `projects` tables include management fields; existing tables receive idempotent `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` statements.
-- 2026-08-12 Phase B started: project schema now includes `description`, `pinned`, and `lastOpenedAt` needed for project search, favorites, and recently-used sorting.
-- 2026-08-12 Freebuff preview configured: install `pnpm install` · preview `sh scripts/start-dev.sh` :5173 · build `pnpm run build`. `scripts/start-dev.sh` boots API (8080) bg + Vite (5173, 0.0.0.0) fg, merges root `.env.local`+`.env` → `artifacts/api-server/.env`, ensures Chrome deps.
-- 2026-08-12 Projects System plan extended to steps 1–20: repo-grounded steps 11–20 (files/research/tasks/agent-ready/activity/DB/API/context-pipeline/UI/empty-states), added phases I–O + re-cut A–H. Key finding: `project_files`/`projects.instructions` exist in schema but are unwired (context pipeline is greenfield).
-- 2026-08-12 session-brief Next-actions sharpened for the steps 11–20 handoff: read plan doc first, extend faithfully, DON'T implement yet (plan-first).
-- 2026-08-12 session-brief restructured to live-state format; CLAUDE.md routine + KNOWLEDGE.md updated to encode the contract (update on every change; never store personal trivia).
-- 2026-08-12 Continuity redesign: KNOWLEDGE.md + session-brief.md replace the 3 old logs; CLAUDE.md routine updated; source-code.ts blockers updated (9ef62ab).
-- 2026-08-12 Projects System plan: `docs/projects-system-plan.md` written for steps 1–10 (4541abd).
-- 2026-08-12 CLAUDE.md cleanup: removed AUTO-RESUME SYSTEM + Chromebook note (2cbf5ae).
-- 2026-08-11 Infinity Books: all 10 tasks done + verified (schema, engine, routes, wizard, polling, A5 PDF).
-- 2026-08-11 Repo cleanup executed (c4ea241, 97aed33).
-- 2026-08-11 home.tsx split (2000→1520 lines) + nl i18n gaps filled.
-- 2026-08-11 `Books/` folder added (5 style samples; user updates it often — re-scan every session).
 
 ## Active threads
-- **Build Studio reliability:** visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
+- **Phase 2** (Timeline + Chatbot) — ready to start after Phase 1 completion
+- **Phase 3** (FAQ + Conflict Detection + Source Attribution) — can proceed in parallel with Phase 2
+- **Phase 4** (Mindmap + Cleanup) — can proceed in parallel with Phase 2
+- **Phase 5** (Connectors + Automations) — needs Phase 1 export schema + Phase 3 conflict detection
+- **Phase 6** (Sharing + Overview) — needs Phase 1 sharing + Phase 5 automation logging
+- **Build Studio reliability**: visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
 - **Infinity Books** — live end-to-end run pending (needs server `.env`).
+- **Google Stitch Phase 2** — await user request to use MCP to inspect generated designs and implement them
 
 ## Next actions
-1. On the next UI-cleanup request, continue with the remaining overlay surfaces (settings panel rows, command palette, toasts) and the hardcoded terminal dark surfaces in Build Studio only if the user flags them.
-2. Optional: delete now-inert `.cron_watchdog.sh` / `.tmux_runner.sh` if user wants.
+1. **Start Phase 2.1** — Timeline UI enhancements in `artifacts/infinity/src/components/projects/project-activity.tsx`: add date-grouping (bucket by day), type filter chips, deep-link navigation
+2. **Start Phase 2.2** — Create `useProjectActivity` hook in `artifacts/infinity/src/hooks/useProjectActivity.ts` for shared fetch logic
+3. **Start Phase 2.3** — Create `project-chatbot.ts` API route for read-only SSE chatbot
+4. **Start Phase 2.4** — Create `project-chatbot.tsx` UI component with citation chips
+5. **Start Phase 2.5** — Wire chatbot into project home (`project-home.tsx`, `project-gallery.tsx`)
 
 ## Locked decisions
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
 - Memory rule: no personal trivia — only project state, changes, and how-it-works.
-
-## Project feature backlog (new — from user)
-1. **Project Timeline** — chronological git-commit-style view of all project activity (conversations, files, memories, research, tasks); click an event → jump to that item.
-2. **Project Chatbot (read-only)** — conversational assistant with read-only access to everything in the project (chats, files, memories, research, etc.).
-3. **AI-generated Project FAQ** — auto-generated Q&A like "What's the goal of this project?" from project context.
-4. **Conflict Detection** — spot contradictions across sources (e.g., project memory says PostgreSQL but yesterday's chat says MongoDB).
-5. **"Explain This" on Mindmap** — click a connection (e.g., README.md ↔ memory) → AI explains the relationship.
-6. **Source Attribution** — every memory/fact shows exact provenance (which conversation, file, line, timestamp it came from).
-7. **Project Cleanup** — one-click scan for: duplicate files, outdated memories, unresolved questions, contradictory decisions.
-8. **Project Import/Export** — import from GitHub (and others); export entire project as `.zip`.
-9. **Project Sharing** — share a project with read-only or collaborator permissions.
-10. **Automations** — scheduled triggers (e.g., "Every Monday 09:00 → summarize today's Calendar agenda → push notification").
-11. **Connectors** — GitHub, Google Drive, Figma, Canva, Google Calendar, Gmail, etc. (replacing ad-hoc Settings integrations).
-12. **Infinity Overview Menu** — global dashboard showing everything Infinity AI is doing right now (researching, building, etc.).
-
-## Open questions
-- Switch launcher to `claude --continue` for literal chat continuation? (not decided)
-
-## Just did (last action)
-- Ran 5 required integration tests (from original task spec) + 1 bonus end-to-end test for the agentic loop — ALL 6 PASS:
-  - TEST 1: Agent inspects codebase (list_files + read_file)
-  - TEST 2: Agent edits precisely (patch_file verifies target before mutating, rejects non-existent search)
-  - TEST 3: Agent runs terminal commands (run_terminal, observes exit 0 / exit 7)
-  - TEST 4: Agent visually inspects UI (preview_screenshot returns clean "no preview" observation)
-  - TEST 5: Agent iterates to completion (think + done reach terminal state)
-  - BONUS: 3-step loop without LLM (read → patch → run, asserts 42 in output)
-  - Test file: `artifacts/api-server/src/routes/infinity/__tests__/agent-loop-integration-direct.test.ts`
-  - Runner: `artifacts/api-server/scripts/run-agent-tests.sh` (uses Node --test + tsx, 0-euro)
-- Completed Phase: Rewire build-studio.tsx to /build/agent SSE endpoint (autonomous agentic loop)
-  - Replaced `runAutoPipeline` (one-shot whole-file regeneration per pass) with `runAgentLoop` consuming SSE from `/api/infinity/build/agent`
-  - Added `AgentBuildEvent` + `AgentBuildResult` interfaces for SSE event types
-  - Modified `doScaffold()`, `continueBuild()`, `toggleAfkMode()` to use `runAgentLoop`
-  - Removed dead code: `runAutoPipeline` function and `IterateResponse` interface
-  - Updated UI text: "Iteration {n}" → "Agent step {n} running..."; "Stop iterating" → "Stop agent"
-  - Added 4 i18n keys (activityAgentStarting, progressAgentStarting, activityPlanCreated, activityVerifying) in EN + NL
-  - Backend `/build/agent` endpoint (implemented in prior session) handles autonomous agent loop with 15 tools
-  - `pnpm run typecheck`: PASSED
-  - `pnpm run build`: PASSED
-  - Commit: 2a7be1a pushed to `abdulmohammedsecrets6/survey-automatically` on branch `agentic-build-development` (origin kasper-kal/Infinity AI is read-only for this session's token)
-
-## Project state — right now
-- **Build Studio agentic loop**: COMPLETE - frontend now consumes SSE from `/build/agent` endpoint for true autonomous agent behavior (inspect → edit → run commands → observe → iterate)
-- **Agent tools**: 15 tools available (list_files, read_file, write_file, patch_file, rename_file, delete_file, run_terminal, search_files, replace_in_files, preview_screenshot, browser_action, run_tests, verify_claim, git_status, think, done)
-- **SSE event types**: plan, tool, observation, verify, done, error, result
-- **Budget**: 0 euro constraint satisfied - all code changes are local, no paid services added
-- **Tests**: 6 integration tests PASS (5 required + 1 bonus), 0-euro Node --test + tsx runner
-
-## Change record (newest first)
-- 2026-08-14: Rename Jarvis → Infinity AI complete (269 files). Backend routes/, config/, imports. Frontend artifact/, components/, hooks/, manifest.json. DB schema jarvisSettings→infinitySettings, owner enum. API spec /jarvis/→/infinity/ + regenerated clients. Docs updated. Pre-existing test errors unchanged.
-- 2026-08-14 Ran 6 agentic-loop integration tests (5 required + 1 bonus) — ALL PASS via `scripts/run-agent-tests.sh` (Node --test + tsx). Test file: `src/routes/infinity/__tests__/agent-loop-integration-direct.test.ts`.
-- 2026-08-14 Rewired build-studio.tsx to /build/agent SSE endpoint: replaced runAutoPipeline with runAgentLoop, removed IterateResponse, updated UI text, added 4 i18n keys EN+NL, typecheck+build PASS. Commit 2a7be1a (pushed to abdulmohammedsecrets6/survey-automatically branch agentic-build-development).
-- 2026-08-13 Phase M (project activity) completed: frontend ActivityRecord component with cursor pagination + search + load-more + emoji icons, `projectActivity.*` i18n (17 keys EN/NL), gallery/home/home-page wiring for 'activity' section; logActivity integrated across all 7 mutating route files (projects, memories, instructions, tasks, research, conversations, files); Drizzle enum typing fixed with `as const`. Build passes.
-
-## Active threads
-- **Build Studio reliability:** visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
-- **Infinity Books** — live end-to-end run pending (needs server `.env`).
-
-## Just did (last action)
-- Completed Phase 1 of Google Stitch redesign: created comprehensive page inventory (17 distinct pages) and 5 Stitch prompts covering all pages exactly once
-  - Created `docs/google-stitch-prompts/page-inventory.md` — distinguishes 17 actual pages from 14 modal/state components
-  - Created `docs/google-stitch-prompts/prompt-1-core-chat.md` — Chat Mode, Voice Mode, Camera Mode, Agent Mode, Command Palette (5 pages)
-  - Created `docs/google-stitch-prompts/prompt-2-projects.md` — Projects Home, Project Memory, Project Instructions, Project Activity (4 pages)
-  - Created `docs/google-stitch-prompts/prompt-3-build-studio.md` — Build Studio with 13 tabs (1 page)
-  - Created `docs/google-stitch-prompts/prompt-4-creative-studios.md` — Studios Hub, Research Panel, Book Studio, Design Studio, Music Studio (5 pages)
-  - Created `docs/google-stitch-prompts/prompt-5-data-lab-settings.md` — Data Lab, Settings Panel (2 pages)
-  - All prompts: structural specs only, no visual direction, actual text/labels from codebase, max 5 pages per prompt
-
-## Project state — right now
-- **Google Stitch Phase 1**: COMPLETE — all 5 prompts + page inventory written to `docs/google-stitch-prompts/`
-- **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
-- **Infinity Books** — live end-to-end run pending (needs server `.env`)
-
-## Next actions
-1. Push agentic-build-development branch to abdulmohammedsecrets6/survey-automatically (already done this session)
-2. Optional: delete now-inert `.cron_watchdog.sh` / `.tmux_runner.sh` if user wants
-3. When user requests Phase 2: use Google Stitch MCP to inspect generated designs and implement them
-
-## Locked decisions
-- Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.
-- Memory rule: no personal trivia — only project state, changes, and how-it-works.
+- Budget: 0 euro constraint — all services/APIs/hosting/libraries must be permanently 100% free.
+- Git push: use `mine` remote (abdulmohammedsecrets6/survey-automatically), NOT origin (kasper-kal/Infinity AI — read-only for this token).
+- After EVERY response: `git add -A && git commit -m "<what I just did>" && git push mine agentic-build-development`
 
 ## Project feature backlog (new — from user)
 1. **Project Timeline** — chronological git-commit-style view of all project activity (conversations, files, memories, research, tasks); click an event → jump to that item.

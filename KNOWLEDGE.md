@@ -29,6 +29,25 @@
 > Live status (what's done/in-flight/next) always lives in **session-brief.md** — this section holds only permanent facts.
 - **Infinity Books** — permanent facts: full A5-PDF book generator (idea → plan → approve/"change something" → 10-page LLM chunks → 2 critique passes → A5 PDF + book.txt), BYO API key, push notification, background job. Built + verified.
 - **Projects System** — permanent facts: user's 32-step brief "persistent workspaces with isolated project memory"; full requirement capture (steps 1–20) + phases A–O in `docs/projects-system-plan.md`; Phases B–H are implemented and verified (project CRUD/search/sort/archive/open/pin, scoped conversation lifecycle/search, project home, isolated project memory CRUD/pinning/retrieval/extraction, bilingual Project Memory UI, ordered Project Instructions with chat injection, and first-class Projects navigation). Phase I (project files: upload/rename/delete/download/search + scoped `/api/infinity/projects/:id/files` endpoint) is implemented and verified. Phase L (AI Context Pipeline) is implemented: `lib/project-context.ts` assembles six scoped sources (identity, instructions, memory, files, history, research) into the PROJECT CONTEXT block — all queries strictly filtered by projectId for isolation.
+- **12 New Project Features (Phases 1–6)** — user-requested additions on top of the base Projects System:
+  1. **Project Timeline** — chronological git-commit-style view of all project activity; click event → jump to item
+  2. **Project Chatbot (read-only)** — conversational assistant with read-only access to everything in project
+  3. **AI-generated Project FAQ** — auto-generated Q&A like "What's the goal of this project?" from project context
+  4. **Conflict Detection** — spot contradictions across sources (e.g., project memory says PostgreSQL but yesterday's chat says MongoDB)
+  5. **"Explain This" on Mindmap** — click a connection → AI explains the relationship
+  6. **Source Attribution** — every memory/fact shows exact provenance (conversation, file, line, timestamp)
+  7. **Project Cleanup** — one-click scan for duplicate files, outdated memories, unresolved questions, contradictory decisions
+  8. **Project Import/Export** — import from GitHub; export entire project as `.zip`
+  9. **Project Sharing** — share a project with read-only or collaborator permissions
+  10. **Automations** — scheduled triggers (e.g., "Every Monday 09:00 → summarize Calendar agenda → push notification")
+  11. **Connectors** — GitHub, Google Drive, Figma, Canva, Google Calendar, Gmail, etc. (replacing ad-hoc Settings integrations)
+  12. **Infinity Overview Menu** — global dashboard showing everything Infinity AI is doing right now
+  - **Phase 1 (Foundation & Activity Integration) — COMPLETE**: Activity view mounted, global memories have provenance columns (`sourceType`/`sourceRef`), activity `VALID_TYPES` extended with 8 new enum values, `projectShares` schema+API (GET/POST/DELETE `/projects/:id/shares`), `projectExports` schema+API (POST/GET export, POST import), EN+NL i18n keys for all 10 feature areas added.
+  - **Phase 2 (Timeline + Chatbot)** — Timeline UI enhancements, `useProjectActivity` hook, read-only chatbot API+UI
+  - **Phase 3 (Intelligence)** — FAQ generation, conflict detection, line-level source attribution
+  - **Phase 4 (Mindmap + Cleanup)** — connection graph inference, "Explain This" modal, cleanup scanner
+  - **Phase 5 (Connectors + Automations)** — connector framework + sync jobs, automation scheduler + cron
+  - **Phase 6 (Sharing + Overview)** — permission enforcement, public read-only view, system activity dashboard
 
 ## Decisions registry
 - 2026-08-12 Infinity AI UI cleanup: the daily chat shell uses a restrained hierarchy with one toolbar action cluster, quieter grouped sidebar navigation, collapsed Projects by default, bounded conversation reading width, and a centered composer surface; every control surface uses the theme tokens — no hardcoded `bg-white dark:bg-[#...]` or hex bubble colors (user bubble = `bg-primary/10 dark:bg-primary/25`, toolbar/back buttons = `bg-card/80` + `border-border/50`). Deliberate brand colors stay (Studios hub per-studio tiles, Figma purple, Build Studio dark code surfaces).
