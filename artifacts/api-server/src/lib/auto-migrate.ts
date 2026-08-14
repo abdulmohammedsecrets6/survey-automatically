@@ -391,6 +391,22 @@ const CREATE_TABLES = [
   )`,
   `CREATE INDEX IF NOT EXISTS "project_faqs_project_idx" ON "project_faqs" ("project_id")`,
   `CREATE INDEX IF NOT EXISTS "project_faqs_project_created_idx" ON "project_faqs" ("project_id", "created_at")`,
+
+  // ── Project conflicts (contradiction detection) ───────────────
+  `CREATE TABLE IF NOT EXISTS "project_conflicts" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+    "claim_a" text NOT NULL,
+    "source_a" text NOT NULL,
+    "claim_b" text NOT NULL,
+    "source_b" text NOT NULL,
+    "severity" text NOT NULL CHECK ("severity" IN ('high', 'medium', 'low')),
+    "resolved" jsonb NOT NULL DEFAULT '[]'::jsonb,
+    "detected_at" timestamp NOT NULL DEFAULT now(),
+    "resolved_at" timestamp
+  )`,
+  `CREATE INDEX IF NOT EXISTS "project_conflicts_project_idx" ON "project_conflicts" ("project_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_conflicts_detected_idx" ON "project_conflicts" ("detected_at")`,
 ];
 
 /**
