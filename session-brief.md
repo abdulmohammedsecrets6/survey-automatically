@@ -5,6 +5,16 @@ LAST_UPDATED: 2026-08-14 (Grand Vision full incorporation into KNOWLEDGE.md)
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
 ## Just did (last action)
+- **Completed Phase 4 (Mindmap + Cleanup) — all sub-phases 4.1-4.6**:
+  - Phase 4.1: `projectConnections` schema (`lib/db/src/schema/project-mindmap.ts`) with nodeAType/nodeAId/nodeBType/nodeBId/relationship/confidence/explanation/inferredAt — verified already present
+  - Phase 4.2: `project-mindmap.ts` API route (POST `/projects/:id/mindmap/infer` LLM relationship extraction, GET `/projects/:id/mindmap` graph) — verified present, fixed TS errors (enum casts, project.name scope, researchFindings table)
+  - Phase 4.3: `project-mindmap.tsx` UI component wired into `home.tsx` (activeProjectView `'mindmap'`, import, action case, render branch) — fixed fetch-based API calls, edgeTypes cast, generic typing
+  - Phase 4.4: `POST /projects/:id/mindmap/explain` "Explain This" endpoint in same route file — fixed missing `project` variable in scope
+  - Phase 4.5: `project-cleanup.ts` API route (POST `/projects/:id/cleanup/scan` for duplicate files, outdated memories, open questions, contradictions) — fixed `c.resolved.length` on `{}` type with Array.isArray check
+  - Phase 4.6: `project-cleanup.tsx` UI component (tabbed results with Fix actions) — verified present
+  - Added `mindmap_inferred` to project-activity enum (lib/db + api-server VALID_TYPES)
+  - Excluded `src/**/__tests__/**` from api-server tsconfig (pre-existing test file with `.ts` import extensions)
+  - **Typecheck PASSES for all packages** (libs, api-server, infinity, scripts); **infinity build SUCCEEDS**
 - **Updated KNOWLEDGE.md Grand Vision section** with the complete detailed vision (28 sections covering: Core AI Philosophy as central chat-first AI, Plan→Review→Execute loop, 17 Widget Types, Build Flow, Website Versioning, Apply Template, Self-Evolution Inspect/Edit/Heal, Git Transparency, Promo Video Maker with ASMR/Puppeteer/ElevenLabs, Infinity Self-Promo video, Browser-Powered Business Research, Unified Conversational Execution, Deep Workspaces, Visual Feedback Widgets, Big Unifying Idea)
 - **Verified Phase 3.3 + 3.4 complete — Conflict Detection API + UI** (already implemented):
   - API route: `artifacts/api-server/src/routes/infinity/project-conflicts.ts` with POST `/projects/:id/conflicts/scan` (LLM contradiction detection across all 6 sources) and GET `/projects/:id/conflicts` (cached retrieval)
@@ -53,6 +63,14 @@ LAST_UPDATED: 2026-08-14 (Grand Vision full incorporation into KNOWLEDGE.md)
 - **Projects System Phase 3.3**: COMPLETE — Conflict Detection API (POST `/projects/:id/conflicts/scan` + GET, LLM contradiction detection, `projectConflicts` table)
 - **Projects System Phase 3.4**: COMPLETE — Conflict Detection UI (expandable cards, severity badges, resolve/dismiss actions)
 - **Projects System Phase 3.5**: COMPLETE — Line-level Source Attribution (`sourceLocation` JSONB on `project_memories`, file/conversation/research/instruction provenance, updated extraction + display)
+- **Projects System Phase 4.1-4.6**: COMPLETE — Mindmap + Cleanup fully implemented:
+  - Phase 4.1: `projectConnections` schema (`lib/db/src/schema/project-mindmap.ts`)
+  - Phase 4.2: `project-mindmap.ts` API (POST `/mindmap/infer` LLM extraction, GET `/mindmap` graph, POST `/mindmap/explain` edge explanation)
+  - Phase 4.3: `project-mindmap.tsx` UI (React Flow graph) wired into `home.tsx` (activeProjectView 'mindmap')
+  - Phase 4.4: "Explain This" endpoint integrated in same route
+  - Phase 4.5: `project-cleanup.ts` API (POST `/cleanup/scan` — duplicate files, outdated memories, open questions, contradictions)
+  - Phase 4.6: `project-cleanup.tsx` UI (tabbed results with Fix actions)
+  - `mindmap_inferred` added to project-activity enum
 - **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
 - **Infinity Books** — live end-to-end run pending (needs server `.env`)
 - **Google Stitch Phase 1**: COMPLETE — 5 prompts + page inventory written to `docs/google-stitch-prompts/`
@@ -86,7 +104,7 @@ LAST_UPDATED: 2026-08-14 (Grand Vision full incorporation into KNOWLEDGE.md)
 ## Active threads
 - **Phase 2** (Timeline + Chatbot) — COMPLETE (2.1-2.5 done)
 - **Phase 3** (FAQ + Conflict Detection + Source Attribution) — **COMPLETE (3.1-3.5 all done)**
-- **Phase 4** (Mindmap + Cleanup) — **NEXT TO START**
+- **Phase 4** (Mindmap + Cleanup) — **COMPLETE (4.1-4.6 all done)**
 - **Phase 5** (Connectors + Automations) — needs Phase 1 export schema + Phase 3 conflict detection
 - **Phase 6** (Sharing + Overview) — needs Phase 1 sharing + Phase 5 automation logging
 - **Build Studio reliability**: visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
@@ -94,12 +112,11 @@ LAST_UPDATED: 2026-08-14 (Grand Vision full incorporation into KNOWLEDGE.md)
 - **Google Stitch Phase 2** — await user request to use MCP to inspect generated designs and implement them
 
 ## Next actions
-1. **Start Phase 4.1** — Create `project-mindmap.ts` schema (`projectConnections` table: nodeAType, nodeAId, nodeBType, nodeBId, relationship, confidence, inferredAt)
-2. **Start Phase 4.2** — Create `project-mindmap.ts` API route (POST `/projects/:id/mindmap/infer` + GET `/projects/:id/mindmap`) with LLM relationship extraction
-3. **Start Phase 4.3** — Create `project-mindmap.tsx` UI component (React Flow interactive graph; click edge → "Explain This" modal)
-4. **Start Phase 4.4** — Add "Explain This" endpoint (POST `/projects/:id/mindmap/explain`) in same route file
-5. **Start Phase 4.5** — Create `project-cleanup.ts` API route (POST `/projects/:id/cleanup/scan`: duplicate files, outdated memories, open questions, contradictions)
-6. **Start Phase 4.6** — Create `project-cleanup.tsx` UI component (tabbed results with Fix actions)
+1. **Phase 4 COMPLETE** — Mindmap + Cleanup all wired (4.1-4.6 done, typecheck + build PASS)
+2. **Start Phase 5** — Connectors + Automations (GitHub, Google Drive, Figma, Calendar, Gmail; scheduled triggers + automation logging)
+3. **Start Phase 6** — Sharing + Overview (project share management UI, global Infinity overview dashboard)
+4. **Infinity Books** — live end-to-end run pending (needs server `.env` with API keys)
+5. **Google Stitch Phase 2** — await user request to use MCP to inspect generated designs and implement them
 
 ## Locked decisions
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.

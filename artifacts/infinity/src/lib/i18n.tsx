@@ -1291,21 +1291,6 @@ const projectFeaturesNl = {
   "projectConflicts.resolve": "Oplossen",
   "projectConflicts.dismiss": "Negeren",
 
-  /* Project cleanup */
-  "projectCleanup.back": "Terug naar project",
-  "projectCleanup.eyebrow": "Projectopruimen",
-  "projectCleanup.title": "Opruimen",
-  "projectCleanup.description": "Scan met één klik op duplicaten, verouderde items en open vragen.",
-  "projectCleanup.scan": "Project scannen",
-  "projectCleanup.scanning": "Scannen…",
-  "projectCleanup.duplicates": "Dubbele bestanden",
-  "projectCleanup.outdated": "Verouderde herinneringen",
-  "projectCleanup.questions": "Onbeantwoorde vragen",
-  "projectCleanup.contradictions": "Tegenstrijdige beslissingen",
-  "projectCleanup.fix": "Herstellen",
-  "projectCleanup.emptyTitle": "Niets op te ruimen",
-  "projectCleanup.emptyDescription": "Voer een scan uit om opruimkansen te vinden.",
-
   /* Project export / import */
   "projectExport.back": "Terug naar project",
   "projectExport.eyebrow": "Project overdraagbaarheid",

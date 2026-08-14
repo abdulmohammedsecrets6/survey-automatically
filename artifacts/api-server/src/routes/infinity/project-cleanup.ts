@@ -249,8 +249,8 @@ async function scanContradictions(projectId: string) {
     sourceB: c.sourceB,
     severity: c.severity,
     detectedAt: c.detectedAt.toISOString(),
-    resolved: c.resolved && c.resolved.length > 0,
-    fixAction: c.resolved && c.resolved.length > 0 ? "review" : "resolve",
+    resolved: Array.isArray(c.resolved) && c.resolved.length > 0,
+    fixAction: Array.isArray(c.resolved) && c.resolved.length > 0 ? "review" : "resolve",
   }));
 }
 

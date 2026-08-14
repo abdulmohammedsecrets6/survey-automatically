@@ -8,6 +8,7 @@ import ReactFlow, {
   Connection,
   NodeTypes,
   EdgeTypes,
+  EdgeProps,
   Background,
   Controls,
   MiniMap,
@@ -19,7 +20,6 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api } from "../../lib/api";
 import {
   ChevronLeft,
   ChevronRight,
@@ -45,7 +45,6 @@ import {
 } from "../ui/dialog";
 import {
   Button,
-  ButtonProps,
 } from "../ui/button";
 import {
   ScrollArea,
@@ -68,21 +67,25 @@ interface MindmapEdgeData {
   explanation?: string;
 }
 
+interface MindmapNode {
+  id: string;
+  type: string;
+  label: string;
+  data?: MindmapNodeData;
+}
+
+interface MindmapEdge {
+  id: string;
+  source: string;
+  target: string;
+  relationship: "references" | "supports" | "contradicts" | "depends_on";
+  confidence: number;
+  explanation?: string;
+}
+
 interface MindmapData {
-  nodes: Array<{
-    id: string;
-    type: string;
-    label: string;
-    data?: MindmapNodeData;
-  }>;
-  edges: Array<{
-    id: string;
-    source: string;
-    target: string;
-    relationship: "references" | "supports" | "contradicts" | "depends_on";
-    confidence: number;
-    explanation?: string;
-  }>;
+  nodes: MindmapNode[];
+  edges: MindmapEdge[];
 }
 
 interface ExplainResponse {
@@ -141,7 +144,7 @@ function CustomNode({ data, selected }: CustomNodeProps) {
       className={cn(
         "relative flex flex-col items-center gap-1 px-3 py-2 rounded-lg border-2 transition-all duration-200",
         "bg-white dark:bg-gray-800",
-        selected ? `border-2 shadow-lg` : "border-1",
+        selected ? "border-2 shadow-lg" : "border-1",
         `border-[${color}]`,
       )}
       style={{ minWidth: 160, maxWidth: 220 }}
@@ -159,10 +162,11 @@ function CustomNode({ data, selected }: CustomNodeProps) {
 }
 
 interface CustomEdgeProps {
-  data: MindmapEdgeData;
+  data?: MindmapEdgeData;
 }
 
 function CustomEdge({ data }: CustomEdgeProps) {
+  if (!data) return null;
   const color = relationshipColors[data.relationship] || "#6b7280";
   const Icon = relationshipIcons[data.relationship] || Link2;
 
@@ -188,7 +192,7 @@ const nodeTypes: NodeTypes = {
 };
 
 const edgeTypes: EdgeTypes = {
-  custom: CustomEdge,
+  custom: CustomEdge as unknown as EdgeTypes[string],
 };
 
 export function ProjectMindmap({ projectId }: { projectId: string }) {
@@ -203,11 +207,12 @@ export function ProjectMindmap({ projectId }: { projectId: string }) {
   const [showMiniMap, setShowMiniMap] = useState(true);
 
   // Fetch mindmap data
-  const { data: mindmapData, isLoading, error, refetch } = useQuery({
+  const { data: mindmapData, isLoading, error, refetch } = useQuery<MindmapData>({
     queryKey: ["project-mindmap", projectId],
     queryFn: async () => {
-      const response = await api.get<MindmapData>(`/projects/${projectId}/mindmap`);
-      return response.data;
+      const response = await fetch(`/api/infinity/projects/${encodeURIComponent(projectId)}/mindmap`);
+      if (!response.ok) throw new Error("Failed to load mindmap");
+      return (await response.json()) as MindmapData;
     },
     enabled: !!projectId,
   });
@@ -215,11 +220,13 @@ export function ProjectMindmap({ projectId }: { projectId: string }) {
   // Infer connections mutation
   const inferMutation = useMutation({
     mutationFn: async () => {
-      const response = await api.post<{ connections: any[]; inferred: number; cached: boolean }>(
-        `/projects/${projectId}/mindmap/infer`,
-        { forceRegenerate: true }
-      );
-      return response.data;
+      const response = await fetch(`/api/infinity/projects/${encodeURIComponent(projectId)}/mindmap/infer`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ forceRegenerate: true }),
+      });
+      if (!response.ok) throw new Error("Failed to infer connections");
+      return (await response.json()) as { connections: MindmapEdge[]; inferred: number; cached: boolean };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["project-mindmap", projectId] });
@@ -233,23 +240,28 @@ export function ProjectMindmap({ projectId }: { projectId: string }) {
   // Explain edge mutation
   const explainMutation = useMutation({
     mutationFn: async (edge: Edge<MindmapEdgeData>) => {
-      const sourceNode = reactFlowInstance?.getNodes().find(n => n.id === edge.source);
-      const targetNode = reactFlowInstance?.getNodes().find(n => n.id === edge.target);
+      const sourceNode = reactFlowInstance?.getNodes().find((n: Node) => n.id === edge.source);
+      const targetNode = reactFlowInstance?.getNodes().find((n: Node) => n.id === edge.target);
 
       if (!sourceNode || !targetNode) {
         throw new Error("Nodes not found");
       }
 
-      const sourceType = sourceNode.data.type;
+      const sourceType = (sourceNode.data as MindmapNodeData).type;
       const sourceId = sourceNode.id.split(":")[1];
-      const targetType = targetNode.data.type;
+      const targetType = (targetNode.data as MindmapNodeData).type;
       const targetId = targetNode.id.split(":")[1];
 
-      const response = await api.post<ExplainResponse>(`/projects/${projectId}/mindmap/explain`, {
-        nodeA: { type: sourceType, id: sourceId },
-        nodeB: { type: targetType, id: targetId },
+      const response = await fetch(`/api/infinity/projects/${encodeURIComponent(projectId)}/mindmap/explain`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          nodeA: { type: sourceType, id: sourceId },
+          nodeB: { type: targetType, id: targetId },
+        }),
       });
-      return response.data;
+      if (!response.ok) throw new Error("Failed to explain connection");
+      return (await response.json()) as ExplainResponse;
     },
     onSuccess: (data) => {
       setExplanation(data.explanation);
@@ -262,14 +274,14 @@ export function ProjectMindmap({ projectId }: { projectId: string }) {
   });
 
   // Convert API data to React Flow nodes/edges
-  const initialNodes = mindmapData?.nodes.map((n) => ({
+  const initialNodes: Node<MindmapNodeData>[] = (mindmapData?.nodes ?? []).map((n: MindmapNode) => ({
     id: n.id,
     type: "custom",
     position: { x: 0, y: 0 }, // Will be auto-layouted
-    data: n.data as MindmapNodeData,
-  })) ?? [];
+    data: (n.data ?? { label: n.label, type: "file" }) as MindmapNodeData,
+  }));
 
-  const initialEdges = mindmapData?.edges.map((e) => ({
+  const initialEdges: Edge<MindmapEdgeData>[] = (mindmapData?.edges ?? []).map((e: MindmapEdge) => ({
     id: e.id,
     source: e.source,
     target: e.target,
@@ -281,10 +293,10 @@ export function ProjectMindmap({ projectId }: { projectId: string }) {
     } as MindmapEdgeData,
     style: { stroke: relationshipColors[e.relationship], strokeWidth: 1.5 },
     markerEnd: { type: MarkerType.ArrowClosed, color: relationshipColors[e.relationship] },
-  })) ?? [];
+  }));
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState<MindmapNodeData>(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<MindmapEdgeData>(initialEdges);
 
   // Handle edge click for "Explain This"
   const onEdgeClick = useCallback((_event: React.MouseEvent, edge: Edge<MindmapEdgeData>) => {
@@ -413,24 +425,21 @@ export function ProjectMindmap({ projectId }: { projectId: string }) {
 
       {/* React Flow Canvas */}
       <div className="flex-1 relative">
-        <ReactFlow<MindmapNodeData, MindmapEdgeData>
+        <ReactFlow
           nodes={nodes}
           edges={edges}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
-          onConnect={(params: Connection) => setEdges((eds) => addEdge(params as any, eds))}
+          onConnect={(params: Connection) => setEdges((eds) => addEdge(params, eds))}
           onEdgeClick={onEdgeClick}
           onPaneClick={() => setSelectedEdge(null)}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           fitView={false}
           attributionPosition="bottom-right"
-          getNodeId={(node) => node.id}
-          getEdgeId={(edge) => edge.id}
         >
           <Background
             color="#e5e7eb"
-            colorDark="#374151"
             gap={16}
             size={1}
           />
@@ -441,10 +450,10 @@ export function ProjectMindmap({ projectId }: { projectId: string }) {
           />
           {showMiniMap && (
             <MiniMap
-              nodeColor={(node) => nodeTypeColors[node.data.type as keyof typeof nodeTypeColors] || "#6b7280"}
-              nodeStrokeColor={(node) => node.selected ? "#3b82f6" : "transparent"}
+              nodeColor={(node: Node) => nodeTypeColors[(node.data as MindmapNodeData)?.type as keyof typeof nodeTypeColors] || "#6b7280"}
+              nodeStrokeColor={(node: Node) => node.selected ? "#3b82f6" : "transparent"}
               nodeBorderRadius={4}
-              nodeClassName={(node) => node.selected ? "ring-2 ring-blue-500" : ""}
+              nodeClassName={(node: Node) => node.selected ? "ring-2 ring-blue-500" : ""}
               maskColor="rgba(59, 130, 246, 0.1)"
             />
           )}
@@ -497,7 +506,7 @@ export function ProjectMindmap({ projectId }: { projectId: string }) {
               {t("projectMindmap.explainTitle")}
             </DialogTitle>
             <DialogDescription>
-              {selectedEdge
+              {selectedEdge?.data
                 ? `${relationshipLabels[selectedEdge.data.relationship]} (${Math.round(selectedEdge.data.confidence * 100)}% confidence)`
                 : t("projectMindmap.explainDescription")}
             </DialogDescription>

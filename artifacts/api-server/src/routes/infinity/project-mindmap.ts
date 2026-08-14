@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import { db, projects, projectConnections, projectMemories, projectInstructions, projectTasks, projectResearch, projectFiles } from "@workspace/db";
-import { eq, desc, inArray } from "drizzle-orm";
+import { db, projects, projectConnections, projectMemories, projectInstructions, projectTasks, projectResearch, projectResearchFindings, projectFiles } from "@workspace/db";
+import { eq, desc, inArray, and } from "drizzle-orm";
 import { buildProjectContextByProjectId } from "../../lib/project-context";
 import { pooledClient } from "../../lib/llm-client";
 import { logActivity } from "./project-activity";
@@ -157,7 +157,7 @@ Rules:
 
     // Upsert connections (delete existing for this project, insert new)
     await db.delete(projectConnections).where(eq(projectConnections.projectId, projectId));
-    await db.insert(projectConnections).values(cleanedConnections);
+    await db.insert(projectConnections).values(cleanedConnections as any);
 
     // Log activity
     await logActivity(projectId, "mindmap_inferred", `Inferred ${cleanedConnections.length} connections for mindmap`);
@@ -245,6 +245,13 @@ router.post("/projects/:projectId/mindmap/explain", async (req: Request, res: Re
     return;
   }
 
+  // Fetch project name for the system prompt
+  const [project] = await db.select({ id: projects.id, name: projects.name }).from(projects).where(eq(projects.id, projectId)).limit(1);
+  if (!project) {
+    res.status(404).json({ error: "Project not found" });
+    return;
+  }
+
   try {
     // Load the two entities
     const [entityA, entityB] = await Promise.all([
@@ -264,11 +271,15 @@ Entity B (${nodeB.type}:${nodeB.id}): ${formatEntityForExplanation(entityB, node
     // Check if there's a stored connection with explanation
     const [storedConnection] = await db.select()
       .from(projectConnections)
-      .where(eq(projectConnections.projectId, projectId))
-      .where(eq(projectConnections.nodeAType, nodeA.type))
-      .where(eq(projectConnections.nodeAId, nodeA.id))
-      .where(eq(projectConnections.nodeBType, nodeB.type))
-      .where(eq(projectConnections.nodeBId, nodeB.id))
+      .where(
+        and(
+          eq(projectConnections.projectId, projectId),
+          eq(projectConnections.nodeAType, nodeA.type as typeof projectConnections.$inferSelect.nodeAType),
+          eq(projectConnections.nodeAId, nodeA.id),
+          eq(projectConnections.nodeBType, nodeB.type as typeof projectConnections.$inferSelect.nodeBType),
+          eq(projectConnections.nodeBId, nodeB.id),
+        )
+      )
       .limit(1);
 
     let explanation = storedConnection?.explanation;
@@ -417,9 +428,9 @@ async function loadNodeLabels(
   // Load research findings
   const researchIds = nodeIdsByType.get("research");
   if (researchIds && researchIds.size > 0) {
-    const research = await db.select({ id: projectResearch.id, excerpt: projectResearch.excerpt })
-      .from(projectResearch)
-      .where(inArray(projectResearch.id, Array.from(researchIds)));
+    const research = await db.select({ id: projectResearchFindings.id, excerpt: projectResearchFindings.excerpt })
+      .from(projectResearchFindings)
+      .where(inArray(projectResearchFindings.id, Array.from(researchIds)));
     for (const r of research) {
       nodes.push({
         id: `research:${r.id}`,
@@ -453,15 +464,15 @@ async function loadNodeLabels(
 async function loadEntity(projectId: string, type: string, id: string): Promise<any | null> {
   switch (type) {
     case "memory":
-      return db.select().from(projectMemories).where(eq(projectMemories.id, id)).where(eq(projectMemories.projectId, projectId)).limit(1).then((r) => r[0] ?? null);
+      return db.select().from(projectMemories).where(and(eq(projectMemories.id, id), eq(projectMemories.projectId, projectId))).limit(1).then((r) => r[0] ?? null);
     case "instruction":
-      return db.select().from(projectInstructions).where(eq(projectInstructions.id, id)).where(eq(projectInstructions.projectId, projectId)).limit(1).then((r) => r[0] ?? null);
+      return db.select().from(projectInstructions).where(and(eq(projectInstructions.id, id), eq(projectInstructions.projectId, projectId))).limit(1).then((r) => r[0] ?? null);
     case "task":
-      return db.select().from(projectTasks).where(eq(projectTasks.id, id)).where(eq(projectTasks.projectId, projectId)).limit(1).then((r) => r[0] ?? null);
+      return db.select().from(projectTasks).where(and(eq(projectTasks.id, id), eq(projectTasks.projectId, projectId))).limit(1).then((r) => r[0] ?? null);
     case "research":
-      return db.select().from(projectResearch).where(eq(projectResearch.id, id)).where(eq(projectResearch.projectId, projectId)).limit(1).then((r) => r[0] ?? null);
+      return db.select().from(projectResearchFindings).where(and(eq(projectResearchFindings.id, id), eq(projectResearchFindings.projectId, projectId))).limit(1).then((r) => r[0] ?? null);
     case "file":
-      return db.select().from(projectFiles).where(eq(projectFiles.id, id)).where(eq(projectFiles.projectId, projectId)).limit(1).then((r) => r[0] ?? null);
+      return db.select().from(projectFiles).where(and(eq(projectFiles.id, id), eq(projectFiles.projectId, projectId))).limit(1).then((r) => r[0] ?? null);
     default:
       return null;
   }

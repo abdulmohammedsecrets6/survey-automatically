@@ -55,6 +55,7 @@ const VALID_TYPES = [
   "automation_triggered",
   "connector_sync",
   "shared_access",
+  "mindmap_inferred",
 ] as const;
 
 type ActivityType = (typeof VALID_TYPES)[number];

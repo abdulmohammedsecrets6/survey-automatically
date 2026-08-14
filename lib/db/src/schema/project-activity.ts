@@ -30,6 +30,7 @@ export const projectActivity = pgTable(
         "automation_triggered",
         "connector_sync",
         "shared_access",
+        "mindmap_inferred",
       ],
     }).notNull(),
     description: text("description").notNull(),
