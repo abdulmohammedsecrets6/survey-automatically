@@ -19,6 +19,7 @@ import { eq, asc } from "drizzle-orm";
 import {
   canonicalProjectMemoryKey,
 } from "../../lib/project-memory";
+import type { SourceLocation } from "@workspace/db";
 import { buildFullProjectContext } from "../../lib/project-context";
 import { buildLiveContext } from "../../lib/live-context";
 import { detectAndBuildWidget } from "../../lib/widget-detector";
@@ -481,6 +482,7 @@ async function extractAndStoreMemories(
     await extractAndStoreProjectMemories(
       queuedProjectContext.projectId,
       queuedProjectContext.conversationTitle,
+      queuedProjectContext.conversationId,
       userMessage,
       assistantResponse,
     );
@@ -553,6 +555,7 @@ Only save if the user EXPLICITLY says "my name is X", "I work as Y", "I live in 
 async function extractAndStoreProjectMemories(
   projectId: string,
   conversationTitle: string,
+  conversationId: string,
   userMessage: string,
   assistantResponse: string,
 ): Promise<void> {
@@ -564,10 +567,15 @@ async function extractAndStoreProjectMemories(
         {
           role: "system",
           content: `You extract durable facts that are useful for continuing work inside one software or personal project.
-Return ONLY a valid JSON array of objects with "category", "key", and "content" fields, no explanation, no markdown.
+Return ONLY a valid JSON array of objects with "category", "key", "content", and "sourceLocation" fields, no explanation, no markdown.
 Use a category such as about, technical, architecture, decisions, constraints, requirements, preferences, or goals.
 Each key must be a short canonical snake_case label for the fact, stable across future updates.
 Each content value must be one concise, declarative project fact, requirement, constraint, decision, architecture detail, preference, goal, or recurring instruction.
+sourceLocation must be one of:
+- { "type": "conversation", "conversationId": "...", "messageIndex": 0 }
+- { "type": "file", "filePath": "...", "lineStart": 10, "lineEnd": 25 }
+- { "type": "research", "researchJobId": "...", "phaseIndex": 0 }
+- { "type": "instruction", "instructionId": "..." }
 Return [] when nothing durable and project-specific was stated.
 Be extremely selective. Extract only useful project facts explicitly stated or clearly confirmed by the user in this exchange.
 Do not save temporary tasks, questions, guesses, assistant claims, generic programming knowledge, or personal facts unrelated to this project.
@@ -600,6 +608,26 @@ If a later statement changes an earlier fact, use the same key so the existing m
       const category = typeof candidate.category === "string"
         ? candidate.category.trim().toLowerCase().replace(/\s+/g, "_").slice(0, 60)
         : "about";
+
+      // Parse sourceLocation from LLM response or default to conversation
+      let sourceLocation: SourceLocation = {
+        type: "conversation",
+        conversationId,
+        messageIndex: 0,
+      };
+      if (candidate.sourceLocation && typeof candidate.sourceLocation === "object") {
+        const sl = candidate.sourceLocation as Record<string, unknown>;
+        if (sl.type === "conversation" && typeof sl.conversationId === "string" && typeof sl.messageIndex === "number") {
+          sourceLocation = { type: "conversation", conversationId: sl.conversationId, messageIndex: sl.messageIndex };
+        } else if (sl.type === "file" && typeof sl.filePath === "string") {
+          sourceLocation = { type: "file", filePath: sl.filePath, lineStart: typeof sl.lineStart === "number" ? sl.lineStart : undefined, lineEnd: typeof sl.lineEnd === "number" ? sl.lineEnd : undefined };
+        } else if (sl.type === "research" && typeof sl.researchJobId === "string" && typeof sl.phaseIndex === "number") {
+          sourceLocation = { type: "research", researchJobId: sl.researchJobId, phaseIndex: sl.phaseIndex };
+        } else if (sl.type === "instruction" && typeof sl.instructionId === "string") {
+          sourceLocation = { type: "instruction", instructionId: sl.instructionId };
+        }
+      }
+
       if (!content || !key || !category) continue;
 
       await db
@@ -611,6 +639,7 @@ If a later statement changes an earlier fact, use the same key so the existing m
           key,
           sourceType: "conversation",
           sourceRef,
+          sourceLocation,
           updatedAt: new Date(),
         })
         .onConflictDoUpdate({
@@ -620,6 +649,7 @@ If a later statement changes an earlier fact, use the same key so the existing m
             content,
             sourceType: "conversation",
             sourceRef,
+            sourceLocation,
             updatedAt: new Date(),
           },
         });
@@ -653,6 +683,7 @@ type ProjectContext = {
   projectId: string;
   projectName: string;
   conversationTitle: string;
+  conversationId: string;
   prompt: string;
 };
 
@@ -667,7 +698,7 @@ async function buildProjectContext(
 
   if (context && queueForExtraction) {
     const queue = pendingProjectContexts.get(requestId) ?? [];
-    queue.push(context);
+    queue.push({ ...context, conversationId });
     pendingProjectContexts.set(requestId, queue);
     const cleanup = setTimeout(() => {
       const current = pendingProjectContexts.get(requestId);

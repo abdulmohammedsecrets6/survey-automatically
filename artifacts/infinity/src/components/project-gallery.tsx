@@ -40,7 +40,9 @@ export type ProjectSection =
   | 'tasks'
   | 'instructions'
   | 'activity'
-  | 'chatbot';
+  | 'chatbot'
+  | 'faq'
+  | 'conflicts';
 
 interface Project {
   id: string;
@@ -88,6 +90,8 @@ const quickAccessItems: { section: ProjectSection; icon: typeof Home; labelKey: 
   { section: 'instructions', icon: ShieldCheck, labelKey: 'projectGallery.instructions' },
   { section: 'activity', icon: Activity, labelKey: 'projectGallery.activity' },
   { section: 'chatbot', icon: Bot, labelKey: 'projectGallery.chatbot' },
+  { section: 'faq', icon: MessageSquare, labelKey: 'projectGallery.faq' },
+  { section: 'conflicts', icon: ShieldCheck, labelKey: 'projectGallery.conflicts' },
 ];
 
 function projectQueryUrl(query: string, sort: ProjectSort, includeArchived: boolean): string {

@@ -1,6 +1,7 @@
 import {
   boolean,
   index,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -32,6 +33,8 @@ export const projectMemories = pgTable(
       .notNull()
       .default("manual"),
     sourceRef: text("source_ref").notNull().default(""),
+    /** Line-level provenance: { filePath, lineStart, lineEnd } or { conversationId, messageIndex } or { researchJobId, phaseIndex } */
+    sourceLocation: jsonb("source_location"),
     pinned: boolean("pinned").notNull().default(false),
     createdAt: timestamp("created_at").notNull().defaultNow(),
     updatedAt: timestamp("updated_at").notNull().defaultNow(),
@@ -45,3 +48,34 @@ export const projectMemories = pgTable(
 
 export type ProjectMemory = typeof projectMemories.$inferSelect;
 export type NewProjectMemory = typeof projectMemories.$inferInsert;
+
+/** Source location types for line-level provenance */
+export type SourceLocationFile = {
+  type: "file";
+  filePath: string;
+  lineStart?: number;
+  lineEnd?: number;
+};
+
+export type SourceLocationConversation = {
+  type: "conversation";
+  conversationId: string;
+  messageIndex: number;
+};
+
+export type SourceLocationResearch = {
+  type: "research";
+  researchJobId: string;
+  phaseIndex: number;
+};
+
+export type SourceLocationInstruction = {
+  type: "instruction";
+  instructionId: string;
+};
+
+export type SourceLocation =
+  | SourceLocationFile
+  | SourceLocationConversation
+  | SourceLocationResearch
+  | SourceLocationInstruction;

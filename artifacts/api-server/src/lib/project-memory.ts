@@ -1,4 +1,4 @@
-import { db, projectMemories, type ProjectMemory } from "@workspace/db";
+import { db, projectMemories, type ProjectMemory, type SourceLocation } from "@workspace/db";
 import { eq } from "drizzle-orm";
 
 const STOP_WORDS = new Set([
@@ -120,7 +120,20 @@ export async function buildRelevantProjectMemoryContext(
   const lines = selected.map((memory) => {
     const content = memory.content.replace(/\s+/g, " ").trim().slice(0, 1200);
     const source = memory.sourceRef.replace(/\s+/g, " ").trim().slice(0, 240);
-    const sourceSuffix = source ? ` (source: ${source})` : "";
+    let sourceSuffix = source ? ` (source: ${source})` : "";
+    if (memory.sourceLocation) {
+      const sl = memory.sourceLocation as SourceLocation;
+      if (sl.type === "file" && sl.filePath) {
+        const lineInfo = sl.lineStart !== undefined ? (sl.lineEnd !== undefined ? ` (lines ${sl.lineStart}-${sl.lineEnd})` : ` (line ${sl.lineStart})`) : "";
+        sourceSuffix += ` [file: ${sl.filePath}${lineInfo}]`;
+      } else if (sl.type === "conversation") {
+        sourceSuffix += ` [conversation: ${sl.conversationId} msg ${sl.messageIndex}]`;
+      } else if (sl.type === "research") {
+        sourceSuffix += ` [research: ${sl.researchJobId} phase ${sl.phaseIndex}]`;
+      } else if (sl.type === "instruction") {
+        sourceSuffix += ` [instruction: ${sl.instructionId}]`;
+      }
+    }
     return `- [${memory.category}] ${content}${sourceSuffix}`;
   });
 

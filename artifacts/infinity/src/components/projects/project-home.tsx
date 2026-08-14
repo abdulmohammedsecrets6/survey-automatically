@@ -16,10 +16,11 @@ import {
   Plus,
   Sparkles,
   ListTodo,
+  ShieldCheck,
 } from 'lucide-react';
 import { useI18n, type TranslationKey } from '@/lib/i18n';
 
-export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq';
+export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts';
 
 interface ProjectSummary {
   id: string;
@@ -208,6 +209,14 @@ export function ProjectHome({
         description: t('projectHome.faqDesc'),
         count: 0,
         accent: 'text-violet-500 bg-violet-500/10 border-violet-500/20',
+      },
+      {
+        action: 'conflicts' as const,
+        icon: ShieldCheck,
+        label: t('projectHome.conflicts'),
+        description: t('projectHome.conflictsDesc'),
+        count: 0,
+        accent: 'text-rose-500 bg-rose-500/10 border-rose-500/20',
       },
     ];
   }, [payload, recentActivity, t]);

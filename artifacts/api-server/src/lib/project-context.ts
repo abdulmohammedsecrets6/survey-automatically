@@ -187,6 +187,7 @@ export interface BuiltProjectContext {
   projectId: string;
   projectName: string;
   conversationTitle: string;
+  conversationId: string;
   prompt: string;
 }
 
@@ -278,6 +279,7 @@ export async function buildFullProjectContext(
     projectId: project.projectId,
     projectName: project.name,
     conversationTitle: project.conversationTitle,
+    conversationId,
     prompt: parts.join(newline + newline),
   };
 }
@@ -368,6 +370,7 @@ export async function buildProjectContextByProjectId(
     projectId: project.projectId,
     projectName: project.name,
     conversationTitle: "",
+    conversationId: "",
     prompt: parts.join(newline + newline),
   };
 }

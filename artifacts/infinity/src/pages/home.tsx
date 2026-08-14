@@ -37,6 +37,7 @@ import { ProjectInstructions } from '@/components/projects/project-instructions'
 import { ProjectActivity } from '@/components/projects/project-activity';
 import { ProjectChatbot } from '@/components/projects/project-chatbot';
 import { ProjectFAQ } from '@/components/projects/project-faq';
+import { ProjectConflicts } from '@/components/projects/project-conflicts';
 
 export default function Home() {
   const { t, lang } = useI18n();
@@ -65,7 +66,7 @@ export default function Home() {
   }, [thinkingEnabled]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const [activeProjectView, setActiveProjectView] = useState<'home' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq'>('home');
+  const [activeProjectView, setActiveProjectView] = useState<'home' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts'>('home');
   const [sidebarRefreshTick, setSidebarRefreshTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -740,6 +741,10 @@ export default function Home() {
     }
     if (action === 'faq') {
       setActiveProjectView('faq');
+      return;
+    }
+    if (action === 'conflicts') {
+      setActiveProjectView('conflicts');
       return;
     }
     toast({ title: t('projectHome.actionComingSoon'), description: t('projectHome.actionComingSoonDesc') });
@@ -1510,6 +1515,13 @@ export default function Home() {
 
           {activeProjectId && activeProjectView === 'faq' && (
             <ProjectFAQ
+              projectId={activeProjectId}
+              onBack={() => setActiveProjectView('home')}
+            />
+          )}
+
+          {activeProjectId && activeProjectView === 'conflicts' && (
+            <ProjectConflicts
               projectId={activeProjectId}
               onBack={() => setActiveProjectView('home')}
             />
