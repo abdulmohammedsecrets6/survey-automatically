@@ -1,10 +1,12 @@
 # Session Brief — Infinity AI (formerly Jarvis)
-LAST_UPDATED: 2026-08-14 (Grand Vision full incorporation into KNOWLEDGE.md)
+LAST_UPDATED: 2026-08-15 (server .env with all API keys set up)
 > Read FIRST every session (alongside **KNOWLEDGE.md**). **Updated on EVERY change** — this is how sessions feel like one chat.
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
 ## Just did (last action)
+- **Set up server `.env`** at repo root with all 15 API keys (DATABASE_URL, OpenRouter, NVIDIA NIM LLM, ElevenLabs, Tavily, Figma, Spotify, Gmail, Whisper, Image Gen). Server loads it via `index.ts` (repo-root `.env` is one of 3 paths it reads). Verified all 15 load with `dotenv`. **`.env` is git-ignored** (not in git history, not tracked by `git ls-files`) — secrets safe from commit. NOTE: same secrets already existed pre-viously in `archive/` + `qa-report/` (prior sessions) — pre-existing hygiene issue, not addressed yet.
+
 - **Completed Phase 4 (Mindmap + Cleanup) — all sub-phases 4.1-4.6**:
   - Phase 4.1: `projectConnections` schema (`lib/db/src/schema/project-mindmap.ts`) with nodeAType/nodeAId/nodeBType/nodeBId/relationship/confidence/explanation/inferredAt — verified already present
   - Phase 4.2: `project-mindmap.ts` API route (POST `/projects/:id/mindmap/infer` LLM relationship extraction, GET `/projects/:id/mindmap` graph) — verified present, fixed TS errors (enum casts, project.name scope, researchFindings table)
