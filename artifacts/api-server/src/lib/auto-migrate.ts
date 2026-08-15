@@ -425,6 +425,63 @@ const CREATE_TABLES = [
   `CREATE INDEX IF NOT EXISTS "project_connections_node_a_idx" ON "project_connections" ("node_a_type", "node_a_id")`,
   `CREATE INDEX IF NOT EXISTS "project_connections_node_b_idx" ON "project_connections" ("node_b_type", "node_b_id")`,
   `CREATE INDEX IF NOT EXISTS "project_connections_dedup_idx" ON "project_connections" ("project_id", "node_a_type", "node_a_id", "node_b_type", "node_b_id", "relationship")`,
+
+  // ── Project Connectors (GitHub, Google Drive, Figma, Canva, Google Calendar) ──
+  `CREATE TABLE IF NOT EXISTS "project_connectors" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+    "provider" text NOT NULL CHECK ("provider" IN ('github', 'google_drive', 'figma', 'canva', 'google_calendar')),
+    "display_name" text,
+    "access_token" text,
+    "refresh_token" text,
+    "expires_at" bigint,
+    "config" jsonb NOT NULL DEFAULT '{}'::jsonb,
+    "status" text NOT NULL DEFAULT 'disconnected' CHECK ("status" IN ('connected', 'disconnected', 'error', 'expired')),
+    "error" text,
+    "last_sync_at" timestamp,
+    "created_at" timestamp NOT NULL DEFAULT now(),
+    "updated_at" timestamp NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS "project_connectors_project_idx" ON "project_connectors" ("project_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_connectors_project_provider_idx" ON "project_connectors" ("project_id", "provider")`,
+
+  // ── Project Automations (scheduled triggers + run history) ──────────
+  `CREATE TABLE IF NOT EXISTS "project_automations" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+    "name" text NOT NULL,
+    "description" text,
+    "trigger" jsonb NOT NULL,
+    "action" jsonb NOT NULL,
+    "enabled" boolean NOT NULL DEFAULT true,
+    "last_run_at" timestamp,
+    "next_run_at" timestamp,
+    "run_count" integer NOT NULL DEFAULT 0,
+    "last_status" text CHECK ("last_status" IN ('success', 'failed', 'running')),
+    "last_error" text,
+    "last_result" jsonb,
+    "created_at" timestamp NOT NULL DEFAULT now(),
+    "updated_at" timestamp NOT NULL DEFAULT now()
+  )`,
+  `CREATE INDEX IF NOT EXISTS "project_automations_project_idx" ON "project_automations" ("project_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_automations_project_enabled_idx" ON "project_automations" ("project_id", "enabled")`,
+  `CREATE INDEX IF NOT EXISTS "project_automations_next_run_idx" ON "project_automations" ("next_run_at")`,
+
+  `CREATE TABLE IF NOT EXISTS "project_automation_runs" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+    "project_id" uuid NOT NULL REFERENCES "projects"("id") ON DELETE CASCADE,
+    "automation_id" uuid NOT NULL REFERENCES "project_automations"("id") ON DELETE CASCADE,
+    "triggered_by" text NOT NULL DEFAULT 'manual' CHECK ("triggered_by" IN ('cron', 'webhook', 'manual', 'test')),
+    "status" text NOT NULL DEFAULT 'running' CHECK ("status" IN ('running', 'success', 'failed', 'cancelled'),
+    "started_at" timestamp NOT NULL DEFAULT now(),
+    "completed_at" timestamp,
+    "error" text,
+    "result" jsonb,
+    "logs" jsonb NOT NULL DEFAULT '[]'::jsonb
+  )`,
+  `CREATE INDEX IF NOT EXISTS "project_automation_runs_project_idx" ON "project_automation_runs" ("project_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_automation_runs_automation_idx" ON "project_automation_runs" ("automation_id")`,
+  `CREATE INDEX IF NOT EXISTS "project_automation_runs_started_idx" ON "project_automation_runs" ("started_at")`,
 ];
 
 /**

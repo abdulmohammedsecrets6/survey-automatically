@@ -20,6 +20,8 @@ export * from "./project-export";
 export * from "./project-faq";
 export * from "./project-conflicts";
 export * from "./project-mindmap";
+export * from "./project-connectors";
+export * from "./project-automations";
 export * from "./sharing";
 export * from "./accounts";
 export * from "./groups";
