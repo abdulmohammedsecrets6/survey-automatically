@@ -41,6 +41,8 @@ import { ProjectConflicts } from '@/components/projects/project-conflicts';
 import { ProjectMindmap } from '@/components/projects/project-mindmap';
 import { ProjectConnectors } from '@/components/projects/project-connectors';
 import { ProjectAutomations } from '@/components/projects/project-automations';
+import { ProjectSharing } from '@/components/projects/project-sharing';
+import { ProjectExport } from '@/components/projects/project-export';
 
 export default function Home() {
   const { t, lang } = useI18n();
@@ -69,7 +71,7 @@ export default function Home() {
   }, [thinkingEnabled]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const [activeProjectView, setActiveProjectView] = useState<'home' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap' | 'connectors' | 'automations'>('home');
+  const [activeProjectView, setActiveProjectView] = useState<'home' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap' | 'connectors' | 'automations' | 'sharing' | 'export'>('home');
   const [sidebarRefreshTick, setSidebarRefreshTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -760,6 +762,14 @@ export default function Home() {
     }
     if (action === 'automations') {
       setActiveProjectView('automations');
+      return;
+    }
+    if (action === 'sharing') {
+      setActiveProjectView('sharing');
+      return;
+    }
+    if (action === 'export') {
+      setActiveProjectView('export');
       return;
     }
     toast({ title: t('projectHome.actionComingSoon'), description: t('projectHome.actionComingSoonDesc') });
@@ -1556,6 +1566,18 @@ export default function Home() {
 
           {activeProjectId && activeProjectView === 'automations' && (
             <ProjectAutomations
+              projectId={activeProjectId}
+            />
+          )}
+
+          {activeProjectId && activeProjectView === 'sharing' && (
+            <ProjectSharing
+              projectId={activeProjectId}
+            />
+          )}
+
+          {activeProjectId && activeProjectView === 'export' && (
+            <ProjectExport
               projectId={activeProjectId}
             />
           )}

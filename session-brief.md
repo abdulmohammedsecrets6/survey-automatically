@@ -1,10 +1,19 @@
 # Session Brief — Infinity AI (formerly Jarvis)
-LAST_UPDATED: 2026-08-15 (Phase 5 UI wiring complete - Connectors + Automations integrated into project home, sidebar, i18n; typecheck+build PASS)
+LAST_UPDATED: 2026-08-15 (Phase 6 in progress — Project Sharing + Export UI wired into project home; i18n keys EN+NL added; typecheck+build PASS)
 > Read FIRST every session (alongside **KNOWLEDGE.md**). **Updated on EVERY change** — this is how sessions feel like one chat.
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
 ## Just did (last action)
+- **Phase 6 (Sharing + Overview) — frontend wiring IN PROGRESS**:
+  - **project-sharing.tsx** (CREATED): Full CRUD UI for project shares — list with status badges, create dialog (permission Select read/collaborator, optional email, expiry Select), copy-link + open-link actions, revoke (delete) per share. Uses `projectShares` API (`GET/POST /projects/:id/shares`, `DELETE /shares/:id`).
+  - **project-export.tsx** (CREATED): Export list with create dialog (export package summary + includes checklist), download button, status polling via `Check status`. Uses `projectExports` API (`POST /projects/:id/export`, `GET /projects/:id/export`, `GET /export/:id/status`).
+  - **home.tsx**: Added `ProjectSharing` + `ProjectExport` imports; extended `activeProjectView` state to `'sharing' | 'export'`; added handler + render branches following existing pattern.
+  - **project-home.tsx**: Added Sharing (teal/Share2) + Export (slate/Download) action cards; extended `ProjectHomeAction` type.
+  - **i18n.tsx**: Added `projectSharing.*` (EN+NL, 43 keys incl. createTitle/createDescription) + `projectExports.*` (EN+NL, 34 keys — plural namespace to avoid collision with orphaned `projectExport.*` keys used by separate import UI). Fixed Select onValueChange type cast `(v: string) => setNewSharePermission(v as 'read' | 'collaborator')`.
+  - **Typecheck + Build**: Infinity typecheck PASS; infinity build SUCCEEDS.
+  - **Backend note**: API routes `project-sharing.ts` + `project-export.ts` and schemas `projectShares` + `projectExports` already exist and are mounted; real export/zip generation + email-send pending.
+
 - **Phase 5 (Connectors + Automations) UI wiring COMPLETE**:
   - **home.tsx**: Added imports for `ProjectConnectors` + `ProjectAutomations`; extended `activeProjectView` state to include `'connectors' | 'automations'`; added action handler branches in `handleProjectAction`; added JSX render branches for both components following existing pattern (mindmap, faq, conflicts).
   - **project-home.tsx**: Added two new action cards — Connectors (cyan accent, Link2 icon) and Automations (orange accent, Clock icon) — to the action grid, using existing `ProjectHomeAction` type extended with `'connectors' | 'automations'`.
@@ -80,10 +89,12 @@ LAST_UPDATED: 2026-08-15 (Phase 5 UI wiring complete - Connectors + Automations 
   - Phase 4.6: `project-cleanup.tsx` UI (tabbed results with Fix actions)
   - `mindmap_inferred` added to project-activity enum
 - **Projects System Phase 5 (Connectors + Automations)**: UI WIRING COMPLETE — Connectors & Automations fully integrated into project home (action cards), sidebar gallery (quick access), `home.tsx` (activeProjectView + render branches); all i18n keys EN+NL added; Typecheck + Build PASS. Backend API routes (`project-connectors.ts`, `project-automations.ts`) already exist with CRUD + sync/run stubs — real execution layer pending.
+- **Projects System Phase 6 (Sharing + Overview)**: FRONTEND WIRING IN PROGRESS — `project-sharing.tsx` + `project-export.tsx` created; wired into `home.tsx` (activeProjectView 'sharing'/'export'), `project-home.tsx` (action cards), i18n keys `projectSharing.*` + `projectExports.*` (EN+NL). Backend API routes `project-sharing.ts` + `project-export.ts` + schemas `projectShares`/`projectExports` exist and mounted. Real export zip generation + share email pending.
 - **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
 - **Infinity Books** — live end-to-end run pending (needs server `.env`)
 
 ## Change record (newest first — EVERY change logged here, cap ~15)
+- 2026-08-15: Phase 6 — Created `project-sharing.tsx` + `project-export.tsx` UI components; wired into `home.tsx` (activeProjectView 'sharing'/'export' + handlers + render branches), `project-home.tsx` (Sharing teal/Share2 + Export slate/Download action cards); i18n keys `projectSharing.*` (43 EN+NL) + `projectExports.*` (34 EN+NL, plural namespace); fixed Select type cast; typecheck+build PASS.
 - 2026-08-14: Updated KNOWLEDGE.md Grand Vision section with complete detailed vision (28 sections: Core AI Philosophy, Plan→Review→Execute, 17 Widget Types, Build Flow, Website Versioning, Apply Template, Self-Evolution Inspect/Edit/Heal, Git Transparency, Promo Video Maker, Infinity Self-Promo, Browser-Powered Business Research, Unified Conversational Execution, Deep Workspaces, Visual Feedback Widgets, Big Unifying Idea)
 - 2026-08-14: Verified Phase 3.3-3.5 already fully implemented — Conflict Detection API (`project-conflicts.ts`), UI (`project-conflicts.tsx`), and Source Attribution (`sourceLocation` JSONB on `project_memories` with file/conversation/research/instruction types) all complete; infinity frontend typecheck + build PASS
 - 2026-08-14: Fixed missing Dutch i18n keys for `projectHome.conflicts` and `projectHome.conflictsDesc` in `i18n.tsx` — added translations to Dutch dictionary; infinity frontend typecheck + build PASS

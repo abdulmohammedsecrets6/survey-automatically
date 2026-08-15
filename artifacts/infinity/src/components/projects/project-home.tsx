@@ -19,10 +19,12 @@ import {
   ListTodo,
   ShieldCheck,
   GitBranch,
+  Share2,
+  Download,
 } from 'lucide-react';
 import { useI18n, type TranslationKey } from '@/lib/i18n';
 
-export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap' | 'connectors' | 'automations';
+export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap' | 'connectors' | 'automations' | 'sharing' | 'export';
 
 interface ProjectSummary {
   id: string;
@@ -243,6 +245,22 @@ export function ProjectHome({
         description: t('projectHome.automationsDesc'),
         count: 0,
         accent: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
+      },
+      {
+        action: 'sharing' as const,
+        icon: Share2,
+        label: t('projectHome.sharing'),
+        description: t('projectHome.sharingDesc'),
+        count: 0,
+        accent: 'text-teal-500 bg-teal-500/10 border-teal-500/20',
+      },
+      {
+        action: 'export' as const,
+        icon: Download,
+        label: t('projectHome.export'),
+        description: t('projectHome.exportDesc'),
+        count: 0,
+        accent: 'text-slate-500 bg-slate-500/10 border-slate-500/20',
       },
     ];
   }, [payload, recentActivity, t]);
