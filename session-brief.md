@@ -125,7 +125,7 @@ LAST_UPDATED: 2026-08-15 (Phase 6 in progress — Project Sharing + Export UI wi
 - **Phase 3** (FAQ + Conflict Detection + Source Attribution) — **COMPLETE (3.1-3.5 all done)**
 - **Phase 4** (Mindmap + Cleanup) — **COMPLETE (4.1-4.6 all done)**
 - **Phase 5** (Connectors + Automations) — needs Phase 1 export schema + Phase 3 conflict detection
-- **Phase 6** (Sharing + Overview) — needs Phase 1 sharing + Phase 5 automation logging
+- **Phase 6** (Sharing + Overview) — FRONTEND UI done (sharing + export components wired); Overview dashboard pending; backend share/export APIs + schemas exist & mounted
 - **Build Studio reliability**: visible progress transcript, plan/scaffold error handling, cancellation, and bounded self-review pipeline are implemented and verified; no active code changes remain.
 - **Infinity Books** — live end-to-end run pending (needs server `.env`).
 
@@ -134,7 +134,10 @@ LAST_UPDATED: 2026-08-15 (Phase 6 in progress — Project Sharing + Export UI wi
    - Implement real provider sync in `project-connectors.ts` `/sync` (OAuth flows for GitHub/Google/Figma/Canva/Calendar/Gmail)
    - Implement real `executeAutomationAction()` in `project-automations.ts` (delegate to FAQ/conflict/cleanup routes + web-push notifyAll)
    - Boot-time cron scheduler mirroring `timer-scheduler.ts` with proper cron parser
-2. **Start Phase 6** — Sharing + Overview (project share management UI, global Infinity overview dashboard)
+2. **Phase 6 (Sharing + Overview) — UI wiring DONE**; pending:
+   - Real export zip generation in `project-export.ts` (currently stubbed `pending`→`ready` with no file)
+   - Share email delivery in `project-sharing.ts` (currently creates link only)
+   - Global Infinity Overview dashboard (`overview.*` i18n keys exist; component pending)
 3. **Infinity Books** — live end-to-end run pending (needs server `.env` with API keys)
 
 ## Locked decisions
