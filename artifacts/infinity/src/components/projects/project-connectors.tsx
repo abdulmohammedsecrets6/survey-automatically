@@ -456,14 +456,17 @@ export function ProjectConnectors({ projectId }: { projectId: string }) {
                   <SelectValue placeholder={t("projectConnector.selectProvider") || "Select provider"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(providerLabels).map(([key, label]) => (
+                  {Object.entries(providerLabels).map(([key, label]) => {
+                    const Icon = getProviderIcon(key);
+                    return (
                     <SelectItem key={key} value={key}>
                       <div className="flex items-center gap-2">
-                        <getProviderIcon(key) className="w-4 h-4" />
+                        <Icon className="w-4 h-4" />
                         <span>{label}</span>
                       </div>
                     </SelectItem>
-                  ))}
+                    );
+                  })}
                 </SelectContent>
               </Select>
             </div>
@@ -517,7 +520,10 @@ export function ProjectConnectors({ projectId }: { projectId: string }) {
               <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 dark:bg-gray-800 rounded-lg">
                 {editingConnector && (
                   <>
-                    <getProviderIcon(editingConnector.provider) className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+                    {(() => {
+                      const Icon = getProviderIcon(editingConnector.provider);
+                      return <Icon className="w-5 h-5 text-gray-600 dark:text-gray-400" />;
+                    })()}
                     <span className="font-medium text-gray-900 dark:text-gray-100">
                       {getProviderLabel(editingConnector.provider)}
                     </span>

@@ -1,11 +1,17 @@
 # Session Brief — Infinity AI (formerly Jarvis)
-LAST_UPDATED: 2026-08-15 (server .env with all API keys set up)
+LAST_UPDATED: 2026-08-15 (Phase 5 UI wiring complete - Connectors + Automations integrated into project home, sidebar, i18n; typecheck+build PASS)
 > Read FIRST every session (alongside **KNOWLEDGE.md**). **Updated on EVERY change** — this is how sessions feel like one chat.
 > This file must ALWAYS reflect the project *right now*. After every change: append to Change record, refresh Project state.
 > **Never store personal trivia here** (e.g. what to call the user) — that's unnecessary space. Only state, changes, and how-it-works.
 
 ## Just did (last action)
-- **Set up server `.env`** at repo root with all 15 API keys (DATABASE_URL, OpenRouter, NVIDIA NIM LLM, ElevenLabs, Tavily, Figma, Spotify, Gmail, Whisper, Image Gen). Server loads it via `index.ts` (repo-root `.env` is one of 3 paths it reads). Verified all 15 load with `dotenv`. **`.env` is git-ignored** (not in git history, not tracked by `git ls-files`) — secrets safe from commit. NOTE: same secrets already existed pre-viously in `archive/` + `qa-report/` (prior sessions) — pre-existing hygiene issue, not addressed yet.
+- **Phase 5 (Connectors + Automations) UI wiring COMPLETE**:
+  - **home.tsx**: Added imports for `ProjectConnectors` + `ProjectAutomations`; extended `activeProjectView` state to include `'connectors' | 'automations'`; added action handler branches in `handleProjectAction`; added JSX render branches for both components following existing pattern (mindmap, faq, conflicts).
+  - **project-home.tsx**: Added two new action cards — Connectors (cyan accent, Link2 icon) and Automations (orange accent, Clock icon) — to the action grid, using existing `ProjectHomeAction` type extended with `'connectors' | 'automations'`.
+  - **project-gallery.tsx**: Extended `ProjectSection` union type with `'connectors' | 'automations'`; added `Link2` + `Clock` icons to imports; added sidebar quick-access entries for both sections.
+  - **i18n.tsx**: Added 24 missing `projectConnector.*` keys (EN+NL) for status labels (connected/disconnected/error/expired), form fields (displayName, provider, config, oauthNote), actions (addDescription, edit, delete, save, cancel, adding/deleting/saving), and confirm dialog text; added 2 missing `projectAutomation.*` keys (edit, save) in EN+NL; added `projectGallery.connectors` + `projectGallery.automations` + `projectHome.connectors/connectorsDesc/automations/automationsDesc` in EN+NL.
+  - **project-connectors.tsx**: Fixed two TSX errors — `<getProviderIcon(...) />` calls now properly assign to `const Icon = getProviderIcon(...)` then render `<Icon />`.
+  - **Typecheck + Build**: All packages (libs, api-server, infinity) typecheck PASS; infinity build SUCCEEDS.
 
 - **Completed Phase 4 (Mindmap + Cleanup) — all sub-phases 4.1-4.6**:
   - Phase 4.1: `projectConnections` schema (`lib/db/src/schema/project-mindmap.ts`) with nodeAType/nodeAId/nodeBType/nodeBId/relationship/confidence/explanation/inferredAt — verified already present
@@ -73,6 +79,7 @@ LAST_UPDATED: 2026-08-15 (server .env with all API keys set up)
   - Phase 4.5: `project-cleanup.ts` API (POST `/cleanup/scan` — duplicate files, outdated memories, open questions, contradictions)
   - Phase 4.6: `project-cleanup.tsx` UI (tabbed results with Fix actions)
   - `mindmap_inferred` added to project-activity enum
+- **Projects System Phase 5 (Connectors + Automations)**: UI WIRING COMPLETE — Connectors & Automations fully integrated into project home (action cards), sidebar gallery (quick access), `home.tsx` (activeProjectView + render branches); all i18n keys EN+NL added; Typecheck + Build PASS. Backend API routes (`project-connectors.ts`, `project-automations.ts`) already exist with CRUD + sync/run stubs — real execution layer pending.
 - **Build Studio agentic loop**: COMPLETE - frontend consumes SSE from `/build/agent` endpoint for true autonomous agent behavior
 - **Infinity Books** — live end-to-end run pending (needs server `.env`)
 
@@ -112,10 +119,12 @@ LAST_UPDATED: 2026-08-15 (server .env with all API keys set up)
 - **Infinity Books** — live end-to-end run pending (needs server `.env`).
 
 ## Next actions
-1. **Phase 4 COMPLETE** — Mindmap + Cleanup all wired (4.1-4.6 done, typecheck + build PASS)
-2. **Start Phase 5** — Connectors + Automations (GitHub, Google Drive, Figma, Calendar, Gmail; scheduled triggers + automation logging)
-3. **Start Phase 6** — Sharing + Overview (project share management UI, global Infinity overview dashboard)
-4. **Infinity Books** — live end-to-end run pending (needs server `.env` with API keys)
+1. **Phase 5 (Connectors + Automations) — UI wiring DONE**; pending: real execution layer:
+   - Implement real provider sync in `project-connectors.ts` `/sync` (OAuth flows for GitHub/Google/Figma/Canva/Calendar/Gmail)
+   - Implement real `executeAutomationAction()` in `project-automations.ts` (delegate to FAQ/conflict/cleanup routes + web-push notifyAll)
+   - Boot-time cron scheduler mirroring `timer-scheduler.ts` with proper cron parser
+2. **Start Phase 6** — Sharing + Overview (project share management UI, global Infinity overview dashboard)
+3. **Infinity Books** — live end-to-end run pending (needs server `.env` with API keys)
 
 ## Locked decisions
 - Continuity: KNOWLEDGE.md + session-brief.md replace the old logs; raw history in `archive/`.

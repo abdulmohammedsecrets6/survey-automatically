@@ -8,11 +8,13 @@ import {
   BrainCircuit,
   Check,
   ChevronDown,
+  Clock,
   FileText,
   FlaskConical,
   Folder,
   FolderPlus,
   Home,
+  Link2,
   Image as ImageIcon,
   Library,
   ListTodo,
@@ -42,7 +44,9 @@ export type ProjectSection =
   | 'activity'
   | 'chatbot'
   | 'faq'
-  | 'conflicts';
+  | 'conflicts'
+  | 'connectors'
+  | 'automations';
 
 interface Project {
   id: string;
@@ -92,6 +96,8 @@ const quickAccessItems: { section: ProjectSection; icon: typeof Home; labelKey: 
   { section: 'chatbot', icon: Bot, labelKey: 'projectGallery.chatbot' },
   { section: 'faq', icon: MessageSquare, labelKey: 'projectGallery.faq' },
   { section: 'conflicts', icon: ShieldCheck, labelKey: 'projectGallery.conflicts' },
+  { section: 'connectors', icon: Link2, labelKey: 'projectGallery.connectors' },
+  { section: 'automations', icon: Clock, labelKey: 'projectGallery.automations' },
 ];
 
 function projectQueryUrl(query: string, sort: ProjectSort, includeArchived: boolean): string {

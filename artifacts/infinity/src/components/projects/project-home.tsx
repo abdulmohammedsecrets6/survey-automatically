@@ -12,6 +12,7 @@ import {
   FolderKanban,
   FlaskConical,
   Loader2,
+  Link2,
   MessageSquare,
   Plus,
   Sparkles,
@@ -21,7 +22,7 @@ import {
 } from 'lucide-react';
 import { useI18n, type TranslationKey } from '@/lib/i18n';
 
-export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap';
+export type ProjectHomeAction = 'conversations' | 'files' | 'research' | 'tasks' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap' | 'connectors' | 'automations';
 
 interface ProjectSummary {
   id: string;
@@ -226,6 +227,22 @@ export function ProjectHome({
         description: t('projectHome.mindmapDesc'),
         count: 0,
         accent: 'text-indigo-500 bg-indigo-500/10 border-indigo-500/20',
+      },
+      {
+        action: 'connectors' as const,
+        icon: Link2,
+        label: t('projectHome.connectors'),
+        description: t('projectHome.connectorsDesc'),
+        count: 0,
+        accent: 'text-cyan-500 bg-cyan-500/10 border-cyan-500/20',
+      },
+      {
+        action: 'automations' as const,
+        icon: Clock3,
+        label: t('projectHome.automations'),
+        description: t('projectHome.automationsDesc'),
+        count: 0,
+        accent: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
       },
     ];
   }, [payload, recentActivity, t]);

@@ -39,6 +39,8 @@ import { ProjectChatbot } from '@/components/projects/project-chatbot';
 import { ProjectFAQ } from '@/components/projects/project-faq';
 import { ProjectConflicts } from '@/components/projects/project-conflicts';
 import { ProjectMindmap } from '@/components/projects/project-mindmap';
+import { ProjectConnectors } from '@/components/projects/project-connectors';
+import { ProjectAutomations } from '@/components/projects/project-automations';
 
 export default function Home() {
   const { t, lang } = useI18n();
@@ -67,7 +69,7 @@ export default function Home() {
   }, [thinkingEnabled]);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
-  const [activeProjectView, setActiveProjectView] = useState<'home' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap'>('home');
+  const [activeProjectView, setActiveProjectView] = useState<'home' | 'memory' | 'instructions' | 'activity' | 'chatbot' | 'faq' | 'conflicts' | 'mindmap' | 'connectors' | 'automations'>('home');
   const [sidebarRefreshTick, setSidebarRefreshTick] = useState(0);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -750,6 +752,14 @@ export default function Home() {
     }
     if (action === 'mindmap') {
       setActiveProjectView('mindmap');
+      return;
+    }
+    if (action === 'connectors') {
+      setActiveProjectView('connectors');
+      return;
+    }
+    if (action === 'automations') {
+      setActiveProjectView('automations');
       return;
     }
     toast({ title: t('projectHome.actionComingSoon'), description: t('projectHome.actionComingSoonDesc') });
@@ -1534,6 +1544,18 @@ export default function Home() {
 
           {activeProjectId && activeProjectView === 'mindmap' && (
             <ProjectMindmap
+              projectId={activeProjectId}
+            />
+          )}
+
+          {activeProjectId && activeProjectView === 'connectors' && (
+            <ProjectConnectors
+              projectId={activeProjectId}
+            />
+          )}
+
+          {activeProjectId && activeProjectView === 'automations' && (
+            <ProjectAutomations
               projectId={activeProjectId}
             />
           )}
